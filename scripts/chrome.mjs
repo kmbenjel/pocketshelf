@@ -1,5 +1,6 @@
 // Tiny zero-dependency Chrome DevTools driver for screenshots, GIF frames and smoke tests.
-// Chrome is started as a user unit (`systemd-run --user`) because it cannot start from some IDE shells.
+// Chrome runs as a transient user unit (`systemd-run --user`), so it has its own clean environment and stops with
+// the unit; on CI, or with PS_DIRECT_CHROME=1, it is started directly instead.
 import { execFileSync, spawn } from 'node:child_process';
 import { existsSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';

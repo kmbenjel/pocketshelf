@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="__LANG__" dir="__DIR__">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>__TITLE__</title>
+<style>/*__CSS__*/</style>
+</head>
+<body>
+<div id="boot" class="boot">…</div>
+<div id="app" hidden>
+  <header id="top">
+    <div class="top-in">
+      <div class="brand">
+        <h1 id="ttl"></h1>
+        <nav id="tabs" class="tabs" aria-label="Views"></nav>
+        <button id="btn-set" class="icon" type="button"></button>
+      </div>
+      <div class="searchrow">
+        <label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>
+          <input id="q" type="search" enterkeyhint="search" autocomplete="off" autocorrect="off" spellcheck="false"></label>
+        <button id="btn-filter" class="btn" type="button"></button>
+      </div>
+      <div id="active" class="active"></div>
+      <div class="sumrow"><span id="sum"></span><label id="sortbox" class="sort"><span id="sort-l"></span><select id="sort"></select></label></div>
+    </div>
+  </header>
+  <main id="main">
+    <div id="vl"><div id="vl-in"></div></div>
+    <div id="stats" class="stats" hidden></div>
+  </main>
+  <nav id="nav" class="bottomnav" aria-label="Views"></nav>
+</div>
+<div id="sheet" class="sheet" hidden>
+  <div class="scrim" id="scrim"></div>
+  <section class="panel" id="panel" role="dialog" aria-modal="true" tabindex="-1">
+    <button id="x" class="icon close" type="button"></button>
+    <div id="panel-in"></div>
+  </section>
+</div>
+<script id="data" type="text/plain" data-enc="__DATA_ENC__">__DATA__</script>
+<script>/*__FOLD__*/</script>
+<script>/*__JS__*/</script>
+</body>
+</html>

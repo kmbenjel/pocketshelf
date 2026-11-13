@@ -165,3 +165,6 @@ the Arabic ones are classical works with their authors' death years. Code is MIT
 ## Cite
 
 See [`CITATION.cff`](CITATION.cff).
+
+Arabic documentation: [warraq.benjelloun.dev/pocketshelf](https://warraq.benjelloun.dev/pocketshelf/) (source in [`docs/ar/`](docs/ar/index.md)).
+Part of **[Warraq](https://warraq.benjelloun.dev)** (الورّاق), open tools for digital heritage libraries.

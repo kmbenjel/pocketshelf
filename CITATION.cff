@@ -3,8 +3,10 @@ message: "If you use pocketshelf in research or documentation, please cite it as
 title: "pocketshelf: one-file offline catalogs for personal ebook libraries"
 type: software
 version: 0.1.0
+date-released: 2026-11-13
 license: MIT
 repository-code: "https://github.com/kmbenjel/pocketshelf"
+url: "https://warraq.benjelloun.dev/pocketshelf/"
 authors:
   - family-names: Benjelloun
     given-names: Khalid

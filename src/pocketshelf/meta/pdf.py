@@ -148,7 +148,12 @@ def _xmp(buf: bytes) -> dict[str, str]:
         li = el.find(".//rdf:li", ns)
         return ((li.text if li is not None else el.text) or "").strip()
 
-    out = {"title": first("title"), "author": first("creator"), "lang": first("language"), "subject": first("description")}
+    out = {
+        "title": first("title"),
+        "author": first("creator"),
+        "lang": first("language"),
+        "subject": first("description"),
+    }
     pub = first("publisher")
     if pub:
         out["publisher"] = pub

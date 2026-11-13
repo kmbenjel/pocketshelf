@@ -11,7 +11,19 @@ from ..lives import split_life_dates
 Parsed = dict[str, "str | int"]
 Profile = Callable[..., "Parsed | None"]
 
-FIELDS = ("title", "author", "editor", "publisher", "place", "year", "series", "edition", "volume", "lang", "skip")
+FIELDS = (
+    "title",
+    "author",
+    "editor",
+    "publisher",
+    "place",
+    "year",
+    "series",
+    "edition",
+    "volume",
+    "lang",
+    "skip",
+)
 _TOKEN = re.compile(r"\{(\w+)\}")
 
 
@@ -81,7 +93,9 @@ def parse_dashes(stem: str, order: str = "title-author") -> Parsed | None:
 # --- the `warraq` profile ---------------------------------------------------------------------------------------
 
 _EDITOR = re.compile(r"^(?:ت|تحقيق|تحقيق وتعليق|تح)\s+(.+)$")
-_PUB_PLACE = re.compile(r"^(.+?)\s+(بيروت|القاهرة|دمشق|الرياض|عمان|الدار البيضاء|الرباط|تونس|بغداد|الكويت|جدة|مكة|المدينة|الإسكندرية|حلب|الجزائر|الدوحة|مصر|لبنان)$")
+_PUB_PLACE = re.compile(
+    r"^(.+?)\s+(بيروت|القاهرة|دمشق|الرياض|عمان|الدار البيضاء|الرباط|تونس|بغداد|الكويت|جدة|مكة|المدينة|الإسكندرية|حلب|الجزائر|الدوحة|مصر|لبنان)$"
+)
 _VOL = re.compile(r"^(\d{1,3})\s*[-–]\s*(.+)$")
 
 
@@ -144,7 +158,9 @@ def get_profile(name: str) -> Profile:
 class FilenameParser:
     """Tries the user's templates in order, then a profile, then the generic dash split."""
 
-    def __init__(self, templates: list[str] | None = None, profile: str | None = None, order: str = "title-author"):
+    def __init__(
+        self, templates: list[str] | None = None, profile: str | None = None, order: str = "title-author"
+    ):
         self.patterns = [compile_template(t) for t in templates or []]
         self.profile = get_profile(profile) if profile else None
         self.order = order

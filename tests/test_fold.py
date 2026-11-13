@@ -49,7 +49,18 @@ def test_fold_is_idempotent():
 def test_python_and_js_fold_agree(tmp_path: Path):
     """The page's fold.js must produce exactly what fold.py produces."""
     js = Path(__file__).parents[1] / "src/pocketshelf/assets/fold.js"
-    strings = [c[0] or "" for c in CASES] + ["Les Misérables", "حدّثنا أبو هريرة", "Ǆ ǅ ǆ", "ﬁnance ﬂuide", "x²", "①②", "Ⅷ", "日本語 テスト", "a–b—c", "ſ"]
+    strings = [c[0] or "" for c in CASES] + [
+        "Les Misérables",
+        "حدّثنا أبو هريرة",
+        "Ǆ ǅ ǆ",
+        "ﬁnance ﬂuide",
+        "x²",
+        "①②",
+        "Ⅷ",
+        "日本語 テスト",
+        "a–b—c",
+        "ſ",
+    ]
     (tmp_path / "in.json").write_text(json.dumps(strings), encoding="utf-8")
     runner = tmp_path / "r.js"
     runner.write_text(

@@ -34,22 +34,59 @@ examples:
 """
 
 
-def _log(*a: object) -> None:
-    print(*a, file=sys.stderr)
+def _log(*a: object, **kw: object) -> None:
+    print(*a, file=sys.stderr, **kw)  # type: ignore[call-overload]
 
 
 def _add_scan_args(p: argparse.ArgumentParser) -> None:
     g = p.add_argument_group("how filenames and files are read")
-    g.add_argument("--profile", help="filename profile: warraq, dashes, author-title, or an installed plugin (entry point group pocketshelf.profiles)")
-    g.add_argument("--template", action="append", default=[], metavar="T", help="filename template, repeatable, first match wins; fields: {title} {author} {editor} {publisher} {place} {year} {series} {edition} {volume} {lang} {skip}")
-    g.add_argument("--order", choices=["title-author", "author-title"], default="title-author", help="which part of 'A - B' is the title when no template/profile is given (default: title-author)")
-    g.add_argument("--prefer", choices=["embedded", "filename"], default="embedded", help="which source wins when both give a title or author (default: embedded)")
-    g.add_argument("--no-embedded", action="store_true", help="do not read PDF info/XMP or EPUB OPF (fastest; filenames only)")
-    g.add_argument("--ext", default="pdf,epub,djvu", help="comma-separated extensions to index (default: pdf,epub,djvu)")
-    g.add_argument("--exclude", action="append", default=[], metavar="GLOB", help="skip matching files or folders, repeatable")
-    g.add_argument("--no-volume-groups", action="store_true", help="never merge numbered files of one folder into a multi-volume book")
+    g.add_argument(
+        "--profile",
+        help="filename profile: warraq, dashes, author-title, or an installed plugin (entry point group pocketshelf.profiles)",
+    )
+    g.add_argument(
+        "--template",
+        action="append",
+        default=[],
+        metavar="T",
+        help="filename template, repeatable, first match wins; fields: {title} {author} {editor} {publisher} {place} {year} {series} {edition} {volume} {lang} {skip}",
+    )
+    g.add_argument(
+        "--order",
+        choices=["title-author", "author-title"],
+        default="title-author",
+        help="which part of 'A - B' is the title when no template/profile is given (default: title-author)",
+    )
+    g.add_argument(
+        "--prefer",
+        choices=["embedded", "filename"],
+        default="embedded",
+        help="which source wins when both give a title or author (default: embedded)",
+    )
+    g.add_argument(
+        "--no-embedded",
+        action="store_true",
+        help="do not read PDF info/XMP or EPUB OPF (fastest; filenames only)",
+    )
+    g.add_argument(
+        "--ext", default="pdf,epub,djvu", help="comma-separated extensions to index (default: pdf,epub,djvu)"
+    )
+    g.add_argument(
+        "--exclude",
+        action="append",
+        default=[],
+        metavar="GLOB",
+        help="skip matching files or folders, repeatable",
+    )
+    g.add_argument(
+        "--no-volume-groups",
+        action="store_true",
+        help="never merge numbered files of one folder into a multi-volume book",
+    )
     g.add_argument("--jobs", type=int, default=8, help="threads reading file metadata (default 8)")
-    g.add_argument("--no-cache", action="store_true", help="do not keep a metadata cache in ~/.cache/pocketshelf")
+    g.add_argument(
+        "--no-cache", action="store_true", help="do not keep a metadata cache in ~/.cache/pocketshelf"
+    )
 
 
 def _scan_opts(a: argparse.Namespace) -> ScanOptions:
@@ -74,7 +111,11 @@ def cmd_build(a: argparse.Namespace) -> int:
     t0 = time.time()
     meta: dict = {}
     if src.is_dir():
-        books = scan(src, _scan_opts(a), progress=lambda i, n: _log(f"\r  reading metadata {i}/{n}", end="") if n > 400 else None)
+        books = scan(
+            src,
+            _scan_opts(a),
+            progress=lambda i, n: _log(f"\r  reading metadata {i}/{n}", end="") if n > 400 else None,
+        )
         if len(books) > 400:
             _log()
         out = Path(a.output) if a.output else src / "pocketshelf.html"
@@ -99,7 +140,13 @@ def cmd_build(a: argparse.Namespace) -> int:
     if lang not in LANGS:
         _log(f"error: --lang must be one of {', '.join(LANGS)}")
         return 2
-    page = build_html(books, title=title, lang=lang, base=base, compress=False if a.no_compress else (True if a.compress else None))
+    page = build_html(
+        books,
+        title=title,
+        lang=lang,
+        base=base,
+        compress=False if a.no_compress else (True if a.compress else None),
+    )
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(page, encoding="utf-8")
     _log(f"{len(books):,} entries -> {out} ({len(page.encode()) / 1e6:.2f} MB) in {time.time() - t0:.1f}s")
@@ -130,7 +177,11 @@ def cmd_inspect(a: argparse.Namespace) -> int:
 
 def _demo_books(kind: str):
     out = []
-    for name in {"arabic": ["arabic-classics.csv"], "gutenberg": ["gutenberg-sample.csv"], "all": ["gutenberg-sample.csv", "arabic-classics.csv"]}[kind]:
+    for name in {
+        "arabic": ["arabic-classics.csv"],
+        "gutenberg": ["gutenberg-sample.csv"],
+        "all": ["gutenberg-sample.csv", "arabic-classics.csv"],
+    }[kind]:
         with resources.as_file(resources.files("pocketshelf").joinpath("data", name)) as f:
             books, _ = read_catalog(f)
             out += books
@@ -172,31 +223,69 @@ def cmd_bench(a: argparse.Namespace) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(prog="pocketshelf", description=DESCRIPTION, epilog=EPILOG, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(
+        prog="pocketshelf",
+        description=DESCRIPTION,
+        epilog=EPILOG,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
     ap.add_argument("--version", action="version", version=f"pocketshelf {__version__}")
     sub = ap.add_subparsers(dest="cmd", required=True, metavar="{build,scan,inspect,demo,bench}")
 
-    b = sub.add_parser("build", help="build the HTML catalog from a folder or a catalog file", description=DESCRIPTION, epilog=EPILOG, formatter_class=argparse.RawDescriptionHelpFormatter)
+    b = sub.add_parser(
+        "build",
+        help="build the HTML catalog from a folder or a catalog file",
+        description=DESCRIPTION,
+        epilog=EPILOG,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
     b.add_argument("source", help="a folder of ebooks, or a catalog .csv/.json")
-    b.add_argument("-o", "--output", help="output file (folder default: <folder>/pocketshelf.html; catalog default: next to it)")
+    b.add_argument(
+        "-o",
+        "--output",
+        help="output file (folder default: <folder>/pocketshelf.html; catalog default: next to it)",
+    )
     b.add_argument("--title", help="page title (default: the folder name)")
-    b.add_argument("--lang", choices=LANGS, help="default UI language; the reader can switch it in Settings (default en)")
-    b.add_argument("--base", help="prefix put before every file path (default: computed from where --output sits relative to the library)")
-    b.add_argument("--sidecar", metavar="CSV", help="CSV (same columns as a catalog) whose rows, matched by path, override scanned metadata")
-    b.add_argument("--map", metavar="A=col,B=col", help="map catalog columns, e.g. author=author_name,work=work_id")
+    b.add_argument(
+        "--lang", choices=LANGS, help="default UI language; the reader can switch it in Settings (default en)"
+    )
+    b.add_argument(
+        "--base",
+        help="prefix put before every file path (default: computed from where --output sits relative to the library)",
+    )
+    b.add_argument(
+        "--sidecar",
+        metavar="CSV",
+        help="CSV (same columns as a catalog) whose rows, matched by path, override scanned metadata",
+    )
+    b.add_argument(
+        "--map", metavar="A=col,B=col", help="map catalog columns, e.g. author=author_name,work=work_id"
+    )
     comp = b.add_mutually_exclusive_group()
-    comp.add_argument("--no-compress", action="store_true", help="embed the data as plain JSON (largest, readable in the HTML)")
-    comp.add_argument("--compress", action="store_true", help="always gzip+base64 the data (default: only above 200 KB)")
+    comp.add_argument(
+        "--no-compress",
+        action="store_true",
+        help="embed the data as plain JSON (largest, readable in the HTML)",
+    )
+    comp.add_argument(
+        "--compress", action="store_true", help="always gzip+base64 the data (default: only above 200 KB)"
+    )
     _add_scan_args(b)
     b.set_defaults(fn=cmd_build)
 
-    s = sub.add_parser("scan", help="write the scanned metadata as an editable CSV", description="Scan a folder and write a catalog CSV you can correct in a spreadsheet, then pass back with --sidecar.")
+    s = sub.add_parser(
+        "scan",
+        help="write the scanned metadata as an editable CSV",
+        description="Scan a folder and write a catalog CSV you can correct in a spreadsheet, then pass back with --sidecar.",
+    )
     s.add_argument("source")
     s.add_argument("-o", "--output", help="CSV to write (default: pocketshelf-catalog.csv)")
     _add_scan_args(s)
     s.set_defaults(fn=cmd_scan)
 
-    i = sub.add_parser("inspect", help="show what pocketshelf reads from one file (filename parse + embedded metadata)")
+    i = sub.add_parser(
+        "inspect", help="show what pocketshelf reads from one file (filename parse + embedded metadata)"
+    )
     i.add_argument("file")
     i.add_argument("--profile")
     i.add_argument("--template", action="append", default=[])
@@ -205,12 +294,16 @@ def main(argv: list[str] | None = None) -> int:
 
     d = sub.add_parser("demo", help="build a sample catalog from public-domain metadata")
     d.add_argument("-o", "--output")
-    d.add_argument("--arabic", action="store_true", help="the Arabic classics sample with an Arabic interface")
+    d.add_argument(
+        "--arabic", action="store_true", help="the Arabic classics sample with an Arabic interface"
+    )
     d.add_argument("--lang", choices=LANGS)
     d.add_argument("--open", action="store_true", help="open the result in the default browser")
     d.set_defaults(fn=cmd_demo)
 
-    be = sub.add_parser("bench", help="build a synthetic catalog of N books and report the size and build time")
+    be = sub.add_parser(
+        "bench", help="build a synthetic catalog of N books and report the size and build time"
+    )
     be.add_argument("-n", type=int, default=20000)
     be.add_argument("--seed", type=int, default=7)
     be.add_argument("--lang", choices=LANGS, default="en")

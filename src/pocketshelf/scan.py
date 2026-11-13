@@ -17,7 +17,7 @@ from .lives import split_life_dates
 from .meta.epub import read_epub
 from .meta.filename import FilenameParser
 from .meta.pdf import read_pdf
-from .model import BOOK_EXTS, Book, Volume
+from .model import Book, Volume
 
 _VOL_PREFIX = re.compile(r"^\s*(\d{1,3})\s*[-–._)\s]\s*\S")
 _VOL_WORDS = re.compile(
@@ -86,7 +86,11 @@ class Cache:
         self.dirty = False
         self.file: Path | None = None
         if enabled:
-            base = Path(directory) if directory else Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "pocketshelf"
+            base = (
+                Path(directory)
+                if directory
+                else Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "pocketshelf"
+            )
             self.file = base / (hashlib.sha1(str(root.resolve()).encode()).hexdigest()[:16] + ".json")
             try:
                 self.data = json.loads(self.file.read_text(encoding="utf-8"))
@@ -150,7 +154,9 @@ def walk_dirs(root: Path, opts: ScanOptions) -> list[tuple[str, list[os.DirEntry
     return out
 
 
-def scan(root: str | Path, opts: ScanOptions | None = None, progress: Callable[[int, int], None] | None = None) -> list[Book]:
+def scan(
+    root: str | Path, opts: ScanOptions | None = None, progress: Callable[[int, int], None] | None = None
+) -> list[Book]:
     opts = opts or ScanOptions()
     root = Path(root)
     parser = FilenameParser(opts.templates, opts.profile, opts.order)
@@ -165,7 +171,7 @@ def scan(root: str | Path, opts: ScanOptions | None = None, progress: Callable[[
     for rel, files in dirs:
         vol = opts.group_volumes and rel != "" and is_volume_set([f.name for f in files])
         plans.append((rel, files, vol))
-        for f in (files[:1] if vol else files):
+        for f in files[:1] if vol else files:
             wanted.append((f"{rel}/{f.name}" if rel else f.name, f))
     embedded: dict[str, dict] = {}
     if opts.embedded and wanted:
@@ -198,7 +204,11 @@ def scan(root: str | Path, opts: ScanOptions | None = None, progress: Callable[[
             vols = []
             for f in files:
                 st = f.stat()
-                vols.append(Volume(volume_label(os.path.splitext(_nfc(f.name))[0]), f"{rel}/{_nfc(f.name)}", st.st_size))
+                vols.append(
+                    Volume(
+                        volume_label(os.path.splitext(_nfc(f.name))[0]), f"{rel}/{_nfc(f.name)}", st.st_size
+                    )
+                )
             b = _make_book(parsed, embedded.get(first_rel, {}), opts)
             b.category = _nfc(parent)
             b.volumes = vols
@@ -231,7 +241,9 @@ def _make_book(parsed: dict, emb: dict, opts: ScanOptions) -> Book:
         val = first.get(f) or second.get(f) or ""
         setattr(b, f, str(val).strip())
     b.year = int(parsed.get("year") or emb.get("year") or 0)
-    if parsed.get("author_death") and (not emb.get("author") or opts.prefer != "embedded" or b.author == parsed.get("author")):
+    if parsed.get("author_death") and (
+        not emb.get("author") or opts.prefer != "embedded" or b.author == parsed.get("author")
+    ):
         b.author_death = int(parsed["author_death"])
         b.author_calendar = str(parsed.get("author_calendar", "ce"))
     if b.author and not b.author_death:

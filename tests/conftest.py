@@ -37,25 +37,33 @@ def make_pdf(path: Path, info: dict[str, str] | None = None, xmp: str | None = N
     out += b"xref\n0 %d\n0000000000 65535 f \n" % (len(objs) + 1)
     for o in offs:
         out += b"%010d 00000 n \n" % o
-    out += b"trailer\n<< /Size %d /Root 1 0 R /Info 4 0 R >>\nstartxref\n%d\n%%%%EOF\n" % (len(objs) + 1, xref)
+    out += b"trailer\n<< /Size %d /Root 1 0 R /Info 4 0 R >>\nstartxref\n%d\n%%%%EOF\n" % (
+        len(objs) + 1,
+        xref,
+    )
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(bytes(out))
     return path
 
 
-def make_epub(path: Path, title="T", author="A", lang="en", date="1999-01-01", publisher=None, series=None, subjects=()) -> Path:
+def make_epub(
+    path: Path, title="T", author="A", lang="en", date="1999-01-01", publisher=None, series=None, subjects=()
+) -> Path:
     opf = f"""<?xml version="1.0"?>
 <package xmlns="http://www.idpf.org/2007/opf" version="2.0"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
 <dc:title>{title}</dc:title><dc:creator>{author}</dc:creator><dc:language>{lang}</dc:language><dc:date>{date}</dc:date>
-{f'<dc:publisher>{publisher}</dc:publisher>' if publisher else ''}
-{''.join(f'<dc:subject>{s}</dc:subject>' for s in subjects)}
+{f"<dc:publisher>{publisher}</dc:publisher>" if publisher else ""}
+{"".join(f"<dc:subject>{s}</dc:subject>" for s in subjects)}
 <dc:identifier>urn:isbn:9780141439518</dc:identifier>
-{f'<meta name="calibre:series" content="{series}"/>' if series else ''}
+{f'<meta name="calibre:series" content="{series}"/>' if series else ""}
 </metadata></package>"""
     path.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(path, "w") as z:
         z.writestr("mimetype", "application/epub+zip")
-        z.writestr("META-INF/container.xml", '<?xml version="1.0"?><container xmlns="urn:oasis:names:tc:opendocument:xmlns:container" version="1.0"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>')
+        z.writestr(
+            "META-INF/container.xml",
+            '<?xml version="1.0"?><container xmlns="urn:oasis:names:tc:opendocument:xmlns:container" version="1.0"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>',
+        )
         z.writestr("OEBPS/content.opf", opf)
     return path
 

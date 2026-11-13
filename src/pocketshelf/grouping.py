@@ -7,7 +7,9 @@ import re
 from .fold import fold
 from .model import Book
 
-_NOISE = re.compile(r"\b(vol(ume)?|v|part|pt|ed(ition)?|tome|book|livre|ج|جزء|المجلد|مجلد)\s*\d+\b|\b\d+\s*(vols?|volumes|أجزاء)\b")
+_NOISE = re.compile(
+    r"\b(vol(ume)?|v|part|pt|ed(ition)?|tome|book|livre|ج|جزء|المجلد|مجلد)\s*\d+\b|\b\d+\s*(vols?|volumes|أجزاء)\b"
+)
 _SUB = re.compile(r"[:;،].*$")
 _ARTICLES = ("the ", "a ", "an ", "le ", "la ", "les ", "l ", "der ", "die ", "das ", "el ", "al ", "ال")
 

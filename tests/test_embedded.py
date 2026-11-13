@@ -66,10 +66,24 @@ def test_parse_info_dict_octal_and_newline_escapes():
 
 
 def test_epub(tmp_path, epub_factory):
-    p = epub_factory(tmp_path / "a.epub", title="Emma", author="Jane Austen", lang="en-GB", date="1815-12-23", publisher="John Murray", series="Austen Novels", subjects=["Fiction", "Romance"])
+    p = epub_factory(
+        tmp_path / "a.epub",
+        title="Emma",
+        author="Jane Austen",
+        lang="en-GB",
+        date="1815-12-23",
+        publisher="John Murray",
+        series="Austen Novels",
+        subjects=["Fiction", "Romance"],
+    )
     d = read_epub(str(p))
     assert d["title"] == "Emma" and d["author"] == "Jane Austen" and d["lang"] == "en" and d["year"] == 1815
-    assert d["publisher"] == "John Murray" and d["series"] == "Austen Novels" and d["tags"] == "Fiction; Romance" and d["isbn"] == "9780141439518"
+    assert (
+        d["publisher"] == "John Murray"
+        and d["series"] == "Austen Novels"
+        and d["tags"] == "Fiction; Romance"
+        and d["isbn"] == "9780141439518"
+    )
 
 
 def test_epub_broken(tmp_path):

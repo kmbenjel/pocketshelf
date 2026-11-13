@@ -5,7 +5,10 @@ from pocketshelf.scan import ScanOptions, detect_lang, is_volume_set, scan, volu
 
 
 def tree(tmp_path, pdf_factory, epub_factory):
-    pdf_factory(tmp_path / "History/Rome/The Republic - Cicero.pdf", {"Title": "De Re Publica", "Author": "Marcus Tullius Cicero"})
+    pdf_factory(
+        tmp_path / "History/Rome/The Republic - Cicero.pdf",
+        {"Title": "De Re Publica", "Author": "Marcus Tullius Cicero"},
+    )
     pdf_factory(tmp_path / "History/Rome/SPQR - Beard.pdf")
     epub_factory(tmp_path / "Fiction/emma.epub", title="Emma", author="Jane Austen", lang="en")
     for i in (1, 2, 3):
@@ -25,7 +28,9 @@ def test_scan_basic(tmp_path, pdf_factory, epub_factory):
     books = scan(tmp_path, ScanOptions(cache=False))
     t = by_title(books)
     assert len(books) == 5  # hidden folder skipped, volumes merged
-    assert t["De Re Publica"].author == "Marcus Tullius Cicero" and t["De Re Publica"].category == "History/Rome"
+    assert (
+        t["De Re Publica"].author == "Marcus Tullius Cicero" and t["De Re Publica"].category == "History/Rome"
+    )
     assert t["De Re Publica"].path == "History/Rome/The Republic - Cicero.pdf"
     assert t["SPQR"].author == "Beard"  # filename fallback when the PDF has no info
     assert t["Emma"].fmt == "epub" and t["Emma"].lang == "en" and t["Emma"].category == "Fiction"
@@ -105,7 +110,11 @@ def test_volume_heuristics():
     assert is_volume_set(["الكتاب ج1.pdf", "الكتاب ج2.pdf"])
     assert not is_volume_set(["Foo.pdf"])
     assert not is_volume_set(["Moby Dick - Melville.pdf", "Dracula - Stoker.pdf"])
-    assert volume_label("03 - Foo") == "03" and volume_label("Foo vol 12") == "12" and volume_label("Standalone") == "Standalone"
+    assert (
+        volume_label("03 - Foo") == "03"
+        and volume_label("Foo vol 12") == "12"
+        and volume_label("Standalone") == "Standalone"
+    )
 
 
 def test_detect_lang():

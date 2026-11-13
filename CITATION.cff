@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use pocketshelf in research or documentation, please cite it as below."
+title: "pocketshelf: one-file offline catalogs for personal ebook libraries"
+type: software
+version: 0.1.0
+license: MIT
+repository-code: "https://github.com/kmbenjel/pocketshelf"
+authors:
+  - family-names: Benjelloun
+    given-names: Khalid
+keywords: [ebooks, library catalog, offline, Arabic, right-to-left, digital humanities]

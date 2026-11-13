@@ -8,11 +8,11 @@ const FOLD_DROP_RE = /[\p{M}ـءʿʾʻʼʽ'’‘`´ʹʺ]/gu;
 const FOLD_DIGITS = {'٠':0,'١':1,'٢':2,'٣':3,'٤':4,'٥':5,'٦':6,'٧':7,'٨':8,'٩':9,'۰':0,'۱':1,'۲':2,'۳':3,'۴':4,'۵':5,'۶':6,'۷':7,'۸':8,'۹':9};
 const FOLD_DIGITS_RE = /[٠-٩۰-۹]/g;
 const FOLD_NONWORD_RE = /[^\p{L}\p{N}]+/gu;
-const FOLD_ASCII_RE = /^[a-z0-9 ]*$/;
+const FOLD_ASCII_RE = /^[\x00-\x7f]*$/;
 
 function fold(s) {
   s = s == null ? '' : String(s);
-  if (FOLD_ASCII_RE.test(s)) return s.trim().replace(/ +/g, ' ');
+  if (FOLD_ASCII_RE.test(s)) return s.toLowerCase().replace(/['`]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
   s = s.normalize('NFKD').toLowerCase().replace(FOLD_DROP_RE, '');
   s = s.replace(FOLD_MAP_RE, c => FOLD_MAP[c]).replace(FOLD_DIGITS_RE, c => FOLD_DIGITS[c]);
   return s.replace(FOLD_NONWORD_RE, ' ').trim();

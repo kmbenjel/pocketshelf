@@ -11,9 +11,33 @@ from pocketshelf.model import Book, Volume
 
 def books():
     return [
-        Book(title="Emma", author="Austen, Jane", author_death=1817, category="Fiction/Novels", path="fic/emma.pdf", size=1000, year=1815, lang="en"),
-        Book(title="Emma", author="Jane Austen", category="Fiction/Novels", path="fic/emma2.epub", size=500, edition="2nd"),
-        Book(title="المغني", author="ابن قدامة", author_death=620, author_calendar="ah", category="الفقه", volumes=[Volume("01", "a/01.pdf", 10), Volume("02", "a/02.pdf", 20)], lang="ar"),
+        Book(
+            title="Emma",
+            author="Austen, Jane",
+            author_death=1817,
+            category="Fiction/Novels",
+            path="fic/emma.pdf",
+            size=1000,
+            year=1815,
+            lang="en",
+        ),
+        Book(
+            title="Emma",
+            author="Jane Austen",
+            category="Fiction/Novels",
+            path="fic/emma2.epub",
+            size=500,
+            edition="2nd",
+        ),
+        Book(
+            title="المغني",
+            author="ابن قدامة",
+            author_death=620,
+            author_calendar="ah",
+            category="الفقه",
+            volumes=[Volume("01", "a/01.pdf", 10), Volume("02", "a/02.pdf", 20)],
+            lang="ar",
+        ),
         Book(title="No file", note="</script><b>x</b>"),
     ]
 
@@ -65,7 +89,9 @@ def test_compress_roundtrip_and_threshold():
     small = build_html(books())
     assert 'data-enc="json"' in small
     forced = build_html(books(), compress=True)
-    assert 'data-enc="gzip+base64"' in forced and payload_from(forced) == payload_from(small) | {"m": payload_from(forced)["m"]}
+    assert 'data-enc="gzip+base64"' in forced and payload_from(forced) == payload_from(small) | {
+        "m": payload_from(forced)["m"]
+    }
     many = [Book(title=f"Book {i} " * 3, author=f"Author {i % 50}") for i in range(8000)]
     assert 'data-enc="gzip+base64"' in build_html(many)
 

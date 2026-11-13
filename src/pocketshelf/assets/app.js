@@ -91,7 +91,7 @@ try { D = await loadData(); } catch (e) {
 const tLoad = performance.now() - t0;
 
 /* ------------------------------------------------------------------------------------------------ model */
-const A = D.a.map((a, i) => ({ i, n: a[0], d: a[1], cal: a[2] ? 'ah' : 'ce', f: fold(a[0]) }));
+const A = D.a.map((a, i) => ({ i, n: a[0], d: a[1], cal: a[2] ? 'ah' : 'ce', f: '' }));
 const centOf = y => y > 0 ? Math.ceil(y / 100) : y < 0 ? -Math.ceil(-y / 100) : 0;
 const ceOf = (y, cal) => cal === 'ah' ? Math.round(y * 0.970229 + 621.57) : y;
 A.forEach(a => { a.c = a.d ? centOf(a.d) : 0; a.sort = a.d ? ceOf(a.d, a.cal) : 1e9; a.ck = a.d ? a.cal + ':' + a.c : ''; });
@@ -101,21 +101,33 @@ const hueOf = s => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 +
 const topCat = c => c < 0 ? '' : D.c[c].split('/')[0];
 const W = []; const wById = new Map();
 for (const b of B) {
-  b.tf = fold(b.t); b.af = b.a >= 0 ? A[b.a].f : '';
+  b.tf = ''; b.af = '';
   let w = wById.get(b.w);
   if (!w) { w = { id: W.length, bs: [], rep: b }; wById.set(b.w, w); W.push(w); }
   w.bs.push(b);
 }
 for (const w of W) {
-  const parts = [];
-  for (const b of w.bs) parts.push(b.tf, b.af, fold([b.d.e, b.d.p, b.d.pl, b.d.ed, b.d.s, b.d.i, (b.d.t || []).join(' '), b.d.x ? Object.values(b.d.x).join(' ') : '', b.c >= 0 ? D.c[b.c] : ''].join(' ')));
-  w.h = parts.join(' ');
+  w.h = '';
   w.size = w.bs.reduce((s, b) => s + b.s, 0);
   w.year = Math.max(...w.bs.map(b => b.y));
   w.mt = Math.max(...w.bs.map(b => b.mt));
   w.hue = w.rep.c >= 0 ? hueOf(D.c[w.rep.c]) : 210;
 }
+// The folded search texts are built lazily (right after the first paint, or at the first query): the page opens
+// before the index exists, which is what keeps a 20,000-book catalog quick to open on a phone.
+let indexed = false;
+function buildIndex() {
+  if (indexed) return; indexed = true;
+  for (const a of A) a.f = fold(a.n);
+  for (const b of B) { b.tf = fold(b.t); b.af = b.a >= 0 ? A[b.a].f : ''; }
+  for (const w of W) {
+    const parts = [];
+    for (const b of w.bs) parts.push(b.tf, b.af, fold([b.d.e, b.d.p, b.d.pl, b.d.ed, b.d.s, b.d.i, (b.d.t || []).join(' '), b.d.x ? Object.values(b.d.x).join(' ') : '', b.c >= 0 ? D.c[b.c] : ''].join(' ')));
+    w.h = parts.join(' ');
+  }
+}
 const HASFILES = B.some(b => b.fl && b.fl.length);
+const tModel = performance.now() - t0 - tLoad;
 const catPaths = D.c.map(c => c.split('/'));
 
 /* ------------------------------------------------------------------------------------------------ state */
@@ -179,6 +191,7 @@ function matchWork(w, toks) {
 function filterWorks() {
   computeCatSet();
   const toks = fold(S.q).split(' ').filter(Boolean);
+  if (toks.length || S.sort === 'author') buildIndex();
   const out = [];
   for (const w of W) {
     if (toks.length && !matchWork(w, toks)) continue;
@@ -310,6 +323,7 @@ function catRows() {
 }
 function authorRows() {
   const toks = fold(S.q).split(' ').filter(Boolean);
+  buildIndex();
   const nb = new Map(); for (const b of B) if (b.a >= 0) nb.set(b.a, (nb.get(b.a) || 0) + 1);
   const groups = new Map();
   for (const a of A) {
@@ -530,5 +544,6 @@ applyChrome();
 $('boot').hidden = true; $('app').hidden = false;
 render(false);
 if (S.open && W[+S.open]) openWork(+S.open, false);
-window.__pocketshelf = { readyMs: performance.now(), loadMs: tLoad, books: B.length, works: W.length, search: q => { S.q = q; render(true); return RES.length; }, state: S };
+setTimeout(buildIndex, 30);
+window.__pocketshelf = { readyMs: performance.now(), loadMs: tLoad, modelMs: tModel, books: B.length, works: W.length, search: q => { S.q = q; render(true); return RES.length; }, state: S };
 })();

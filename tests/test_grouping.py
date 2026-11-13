@@ -26,7 +26,11 @@ def test_assign_groups_editions():
 
 
 def test_explicit_work_wins():
-    bs = [Book(title="A", author="x", work="w1"), Book(title="B", author="y", work="w1"), Book(title="A", author="x")]
+    bs = [
+        Book(title="A", author="x", work="w1"),
+        Book(title="B", author="y", work="w1"),
+        Book(title="A", author="x"),
+    ]
     assign_works(bs)
     assert bs[0].work == bs[1].work and bs[2].work != "w1"
 

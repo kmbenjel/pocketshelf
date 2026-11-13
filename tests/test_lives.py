@@ -23,7 +23,10 @@ def test_split_life_dates(raw, name, year, cal):
     assert split_life_dates(raw) == (name, year, cal)
 
 
-@pytest.mark.parametrize(("y", "c"), [(1, 1), (100, 1), (101, 2), (728, 8), (1826, 19), (2000, 20), (-44, -1), (-100, -1), (-101, -2), (0, 0)])
+@pytest.mark.parametrize(
+    ("y", "c"),
+    [(1, 1), (100, 1), (101, 2), (728, 8), (1826, 19), (2000, 20), (-44, -1), (-100, -1), (-101, -2), (0, 0)],
+)
 def test_century(y, c):
     assert century(y) == c
 

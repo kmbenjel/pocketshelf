@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import csv
 import io
 import json
@@ -61,7 +62,9 @@ def parse_volumes(v: object) -> list[Volume]:
     out = []
     for x in v if isinstance(v, list) else []:
         if isinstance(x, dict):
-            out.append(Volume(str(x.get("label", x.get("n", ""))), str(x.get("path", "")), _int(x.get("size", 0))))
+            out.append(
+                Volume(str(x.get("label", x.get("n", ""))), str(x.get("path", "")), _int(x.get("size", 0)))
+            )
         elif isinstance(x, (list, tuple)) and x:
             out.append(Volume(str(x[0]), str(x[1]) if len(x) > 1 else "", _int(x[2]) if len(x) > 2 else 0))
     return out
@@ -84,7 +87,21 @@ def row_to_book(row: dict, mapping: dict[str, str] | None = None) -> Book:
         if key not in r or not r[key]:
             r[key] = v
     b = Book()
-    for f in ("title", "author", "category", "path", "lang", "work", "edition", "editor", "publisher", "place", "series", "isbn", "note"):
+    for f in (
+        "title",
+        "author",
+        "category",
+        "path",
+        "lang",
+        "work",
+        "edition",
+        "editor",
+        "publisher",
+        "place",
+        "series",
+        "isbn",
+        "note",
+    ):
         val = r.get(f, "")
         setattr(b, f, ("; ".join(map(str, val)) if isinstance(val, list) else str(val or "")).strip())
     b.path = b.path.replace("\\", "/")
@@ -95,10 +112,8 @@ def row_to_book(row: dict, mapping: dict[str, str] | None = None) -> Book:
     b.author_calendar = "ah" if cal in ("ah", "h", "hijri", "هـ") else "ce"
     added = str(r.get("added", "") or "").strip()
     if added and not b.mtime:
-        try:
+        with contextlib.suppress(ValueError):
             b.mtime = (date.fromisoformat(added[:10]) - date(1970, 1, 1)).days
-        except ValueError:
-            pass
     if not b.author_death and b.author:
         name, death, cal = split_life_dates(b.author)
         if death:
@@ -174,7 +189,20 @@ def apply_sidecar(books: list[Book], sidecar: list[Book], by_path: bool = True) 
         if target is None:
             continue
         n += 1
-        for f in ("title", "author", "category", "lang", "work", "edition", "editor", "publisher", "place", "series", "isbn", "note"):
+        for f in (
+            "title",
+            "author",
+            "category",
+            "lang",
+            "work",
+            "edition",
+            "editor",
+            "publisher",
+            "place",
+            "series",
+            "isbn",
+            "note",
+        ):
             if getattr(s, f):
                 setattr(target, f, getattr(s, f))
         for f in ("author_death", "pages", "year"):

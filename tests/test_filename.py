@@ -1,17 +1,30 @@
 import pytest
 
 from pocketshelf.meta import filename as fn
-from pocketshelf.meta.filename import FilenameParser, compile_template, parse_dashes, parse_template, parse_warraq
+from pocketshelf.meta.filename import (
+    FilenameParser,
+    compile_template,
+    parse_dashes,
+    parse_template,
+    parse_warraq,
+)
 
 
 def test_template_basic():
     pat = [compile_template("{author} - {title} ({year})")]
-    assert parse_template(pat, "Austen, Jane - Emma (1815)") == {"author": "Austen, Jane", "title": "Emma", "year": 1815}
+    assert parse_template(pat, "Austen, Jane - Emma (1815)") == {
+        "author": "Austen, Jane",
+        "title": "Emma",
+        "year": 1815,
+    }
 
 
 def test_template_non_greedy_and_extra_dashes():
     pat = [compile_template("{author} - {title}")]
-    assert parse_template(pat, "Hugo - Les Misérables - Tome 1") == {"author": "Hugo", "title": "Les Misérables - Tome 1"}
+    assert parse_template(pat, "Hugo - Les Misérables - Tome 1") == {
+        "author": "Hugo",
+        "title": "Les Misérables - Tome 1",
+    }
 
 
 def test_template_year_only_digits():
@@ -45,17 +58,32 @@ def test_dashes_default_and_order():
 
 
 def test_dashes_does_not_split_hyphenated_words():
-    assert parse_dashes("Jean-Jacques Rousseau - Émile") == {"title": "Jean-Jacques Rousseau", "author": "Émile"}
+    assert parse_dashes("Jean-Jacques Rousseau - Émile") == {
+        "title": "Jean-Jacques Rousseau",
+        "author": "Émile",
+    }
 
 
 def test_warraq_full():
     d = parse_warraq("آداب الفتوى والمفتي - النووي - ت بسام الجابي - دار الفكر دمشق")
-    assert d == {"title": "آداب الفتوى والمفتي", "author": "النووي", "editor": "بسام الجابي", "publisher": "دار الفكر", "place": "دمشق"}
+    assert d == {
+        "title": "آداب الفتوى والمفتي",
+        "author": "النووي",
+        "editor": "بسام الجابي",
+        "publisher": "دار الفكر",
+        "place": "دمشق",
+    }
 
 
 def test_warraq_volume_and_death():
     d = parse_warraq("03 - المغني - ابن قدامة ت 620 - ت التركي - هجر")
-    assert d["volume"] == 3 and d["author_death"] == 620 and d["author_calendar"] == "ah" and d["editor"] == "التركي" and d["publisher"] == "هجر"
+    assert (
+        d["volume"] == 3
+        and d["author_death"] == 620
+        and d["author_calendar"] == "ah"
+        and d["editor"] == "التركي"
+        and d["publisher"] == "هجر"
+    )
 
 
 def test_warraq_needs_title_and_author():

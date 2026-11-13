@@ -57,7 +57,15 @@ def make_payload(books: list[Book], title: str = "Library", lang: str = "en", ba
         else:
             files = b.path
         det: dict = {}
-        for k, v in (("e", b.editor), ("p", b.publisher), ("pl", b.place), ("ed", b.edition), ("s", b.series), ("i", b.isbn), ("n", b.note)):
+        for k, v in (
+            ("e", b.editor),
+            ("p", b.publisher),
+            ("pl", b.place),
+            ("ed", b.edition),
+            ("s", b.series),
+            ("i", b.isbn),
+            ("n", b.note),
+        ):
             if v:
                 det[k] = v
         if b.tags:
@@ -89,7 +97,9 @@ def encode_payload(payload: dict, compress: bool | None = None) -> tuple[str, st
     return "json", raw.decode("utf-8").replace("</", "<\\/")
 
 
-def build_html(books: list[Book], title: str = "Library", lang: str = "en", base: str = "", compress: bool | None = None) -> str:
+def build_html(
+    books: list[Book], title: str = "Library", lang: str = "en", base: str = "", compress: bool | None = None
+) -> str:
     if lang not in LANGS:
         raise ValueError(f"unknown UI language {lang!r}; available: {', '.join(LANGS)}")
     payload = make_payload(books, title, lang, base)

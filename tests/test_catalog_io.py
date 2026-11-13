@@ -28,9 +28,24 @@ def test_read_csv_turath_style_row(tmp_path):
 
 def test_read_json_forms(tmp_path):
     f = tmp_path / "c.json"
-    f.write_text(json.dumps({"meta": {"title": "My shelf", "lang": "fr"}, "books": [{"title": "X", "author_death": "1,350", "volumes": [{"n": 1, "path": "a/1.pdf", "size": 5}]}]}))
+    f.write_text(
+        json.dumps(
+            {
+                "meta": {"title": "My shelf", "lang": "fr"},
+                "books": [
+                    {
+                        "title": "X",
+                        "author_death": "1,350",
+                        "volumes": [{"n": 1, "path": "a/1.pdf", "size": 5}],
+                    }
+                ],
+            }
+        )
+    )
     (b,), meta = read_catalog(f)
-    assert meta["title"] == "My shelf" and b.author_death == 1350 and b.volumes[0].label == "1" and b.size == 5
+    assert (
+        meta["title"] == "My shelf" and b.author_death == 1350 and b.volumes[0].label == "1" and b.size == 5
+    )
     g = tmp_path / "d.json"
     g.write_text(json.dumps([{"title": "Y", "ext_ids": {"k": "v"}, "tags": ["a", "b"]}]))
     (c,), _ = read_catalog(g)
@@ -39,9 +54,20 @@ def test_read_json_forms(tmp_path):
 
 def test_aliases_and_mapping(tmp_path):
     f = tmp_path / "c.csv"
-    f.write_text("Name,Authors,File,Section,Researcher,ISBN13,Date\nEmma,Austen,a/b.pdf,Fiction,Ed,9780141439518,1815\n", encoding="utf-8")
+    f.write_text(
+        "Name,Authors,File,Section,Researcher,ISBN13,Date\nEmma,Austen,a/b.pdf,Fiction,Ed,9780141439518,1815\n",
+        encoding="utf-8",
+    )
     (b,), _ = read_catalog(f)
-    assert (b.title, b.author, b.path, b.category, b.editor, b.isbn, b.year) == ("Emma", "Austen", "a/b.pdf", "Fiction", "Ed", "9780141439518", 1815)
+    assert (b.title, b.author, b.path, b.category, b.editor, b.isbn, b.year) == (
+        "Emma",
+        "Austen",
+        "a/b.pdf",
+        "Fiction",
+        "Ed",
+        "9780141439518",
+        1815,
+    )
     g = tmp_path / "d.csv"
     g.write_text("t,who,id\nEmma,Austen,w1\n", encoding="utf-8")
     (c,), _ = read_catalog(g, parse_mapping("title=t,author=who,work=id"))
@@ -57,7 +83,9 @@ def test_tab_separated_and_bom(tmp_path):
 
 def test_author_life_dates_in_name_and_added(tmp_path):
     f = tmp_path / "c.csv"
-    f.write_text("title,author,added\nHamlet,\"Shakespeare, William, 1564-1616\",1970-01-11\n", encoding="utf-8")
+    f.write_text(
+        'title,author,added\nHamlet,"Shakespeare, William, 1564-1616",1970-01-11\n', encoding="utf-8"
+    )
     (b,), _ = read_catalog(f)
     assert b.author == "Shakespeare, William" and b.author_death == 1616 and b.mtime == 10
 
@@ -81,9 +109,25 @@ def test_roundtrip(tmp_path):
     f = tmp_path / "o.csv"
     write_catalog([b], f)
     (r,), _ = read_catalog(f)
-    for field in ("title", "author", "author_death", "author_calendar", "category", "lang", "edition", "tags", "ext_ids", "year", "mtime", "size"):
+    for field in (
+        "title",
+        "author",
+        "author_death",
+        "author_calendar",
+        "category",
+        "lang",
+        "edition",
+        "tags",
+        "ext_ids",
+        "year",
+        "mtime",
+        "size",
+    ):
         assert getattr(r, field) == getattr(b, field) or field == "size", field
-    assert r.size == 30 and [(v.label, v.path, v.size) for v in r.volumes] == [("01", "x/01.pdf", 10), ("02", "x/02.pdf", 20)]
+    assert r.size == 30 and [(v.label, v.path, v.size) for v in r.volumes] == [
+        ("01", "x/01.pdf", 10),
+        ("02", "x/02.pdf", 20),
+    ]
 
 
 def test_parse_volumes_forms():
@@ -95,8 +139,22 @@ def test_parse_volumes_forms():
 
 
 def test_apply_sidecar():
-    scanned = [Book(title="old", path="a/1.pdf"), Book(title="vol", volumes=[Volume("1", "v/1.pdf")]), Book(title="keep", path="k.pdf", author="X")]
-    side = [Book(title="New", author="Au", author_death=100, author_calendar="ah", path="a/1.pdf", tags=["t"]), Book(title="V2", path="v/1.pdf"), Book(title="ghost", path="zz.pdf"), Book(title="nopath")]
+    scanned = [
+        Book(title="old", path="a/1.pdf"),
+        Book(title="vol", volumes=[Volume("1", "v/1.pdf")]),
+        Book(title="keep", path="k.pdf", author="X"),
+    ]
+    side = [
+        Book(title="New", author="Au", author_death=100, author_calendar="ah", path="a/1.pdf", tags=["t"]),
+        Book(title="V2", path="v/1.pdf"),
+        Book(title="ghost", path="zz.pdf"),
+        Book(title="nopath"),
+    ]
     n = apply_sidecar(scanned, side)
-    assert n == 2 and scanned[0].title == "New" and scanned[0].author_calendar == "ah" and scanned[0].tags == ["t"]
+    assert (
+        n == 2
+        and scanned[0].title == "New"
+        and scanned[0].author_calendar == "ah"
+        and scanned[0].tags == ["t"]
+    )
     assert scanned[1].title == "V2" and scanned[2].author == "X"

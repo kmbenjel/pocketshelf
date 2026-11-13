@@ -89,7 +89,8 @@ main{max-width:920px;margin:auto;padding:6px var(--gut) calc(84px + env(safe-are
 .ribbon button small{display:block;color:var(--muted);font-size:.7rem}
 
 /* stats ------------------------------------------------------------------------------------------------------ */
-.stats{padding-top:6px;display:grid;gap:14px}
+.stats{padding-top:6px;display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+.stats>*{min-width:0}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
 .kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
 .kpi b{display:block;font:700 1.5rem/1.2 var(--serif);font-variant-numeric:tabular-nums}

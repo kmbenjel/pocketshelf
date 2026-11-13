@@ -1,0 +1,26 @@
+name: Bug report
+description: Something looks wrong in the catalog or the build.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: cmd
+    attributes:
+      label: The command you ran
+      description: For example `pocketshelf build ~/Books --profile warraq`
+      render: shell
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and device
+      placeholder: Brave 1.7x on Android 14 / Firefox on Linux
+  - type: textarea
+    id: sample
+    attributes:
+      label: A few example file names or CSV rows (public ones, please)
+      description: `pocketshelf inspect FILE` prints what pocketshelf reads from one file.

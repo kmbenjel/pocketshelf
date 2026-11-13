@@ -36,15 +36,24 @@ def test_relative_base_helper(tmp_path):
 
 def test_explicit_base(tmp_path, pdf_factory):
     root = lib(tmp_path, pdf_factory)
-    assert main(["build", str(root), "--base", "/sdcard/Books/", "-o", str(tmp_path / "o.html"), "--no-cache"]) == 0
+    assert (
+        main(["build", str(root), "--base", "/sdcard/Books/", "-o", str(tmp_path / "o.html"), "--no-cache"])
+        == 0
+    )
     assert '"base":"/sdcard/Books/"' in (tmp_path / "o.html").read_text(encoding="utf-8")
 
 
 def test_build_catalog_and_sidecar_and_template(tmp_path, pdf_factory, capsys):
     root = lib(tmp_path, pdf_factory)
     side = tmp_path / "side.csv"
-    side.write_text("path,title,author_death,author_calendar\nFiction/Emma - Austen.pdf,Emma (corrected),1817,ce\n", encoding="utf-8")
-    assert main(["build", str(root), "--sidecar", str(side), "--template", "{title} - {author}", "--no-cache"]) == 0
+    side.write_text(
+        "path,title,author_death,author_calendar\nFiction/Emma - Austen.pdf,Emma (corrected),1817,ce\n",
+        encoding="utf-8",
+    )
+    assert (
+        main(["build", str(root), "--sidecar", str(side), "--template", "{title} - {author}", "--no-cache"])
+        == 0
+    )
     assert "Emma (corrected)" in (root / "pocketshelf.html").read_text(encoding="utf-8")
     assert "1 of 1 rows matched" in capsys.readouterr().err
     cat = tmp_path / "cat.csv"
@@ -111,3 +120,13 @@ def test_version(capsys):
     with pytest.raises(SystemExit):
         main(["--version"])
     assert "pocketshelf 0.1.0" in capsys.readouterr().out
+
+
+def test_progress_line_for_big_folders(tmp_path, capsys):
+    pdf = b"%PDF-1.4\n%%EOF\n"
+    for i in range(450):
+        f = tmp_path / "lib" / f"Book {i} - Author.pdf"
+        f.parent.mkdir(exist_ok=True)
+        f.write_bytes(pdf)
+    assert main(["build", str(tmp_path / "lib"), "--no-cache"]) == 0
+    assert "450 entries" in capsys.readouterr().err

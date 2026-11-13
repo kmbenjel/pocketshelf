@@ -24,43 +24,54 @@ GENRE = {"Novels", "Poetry", "Short Stories", "Plays/Films/Dramas", "Humour", "R
 
 
 def category(shelves: list[str], freq: Counter) -> str:
-    cats = [s[len("Category: "):] for s in shelves if s.startswith("Category: ")]
+    cats = [s[len("Category: ") :] for s in shelves if s.startswith("Category: ")]
     if not cats:
         return "Other"
-    lit = [c for c in cats if c.endswith(" Literature")]
+    lit = [c for c in cats if c.endswith(" Literature") and c not in GENRE]
     pick = lit[0] if lit else min(cats, key=lambda c: freq[c])
     if pick.startswith("History - "):
         return "History/" + re.sub(r"\s*\(.*\)", "", pick[10:])
     if pick.startswith("Science - "):
         return "Science/" + pick[10:]
-    if pick.endswith(" Literature"):
-        return "Literature/" + pick[:-11]
     if pick in GENRE:
         return "Literature/" + pick
+    if pick.endswith(" Literature"):
+        return "Literature/" + pick[:-11]
     if pick in ("Biographies", "Essays, Letters & Speeches", "Journals", "Travel Writing"):
         return "Non-fiction/" + pick
     return "Other/" + pick
 
 
 def main(src: str) -> None:
-    rows = [r for r in csv.DictReader(open(src, encoding="utf-8")) if r["Type"] == "Text"]
+    with open(src, encoding="utf-8") as fh:
+        rows = [r for r in csv.DictReader(fh) if r["Type"] == "Text"]
     freq: Counter = Counter()
     for r in rows:
         for s in r["Bookshelves"].split("; "):
             if s.startswith("Category: "):
-                freq[s[len("Category: "):]] += 1
+                freq[s[len("Category: ") :]] += 1
     first = lambda r: r["Authors"].split(";")[0].strip()  # noqa: E731
     life = re.compile(r"\d{4}\s*-\s*\d{4}")
     per_author: dict[str, list[dict]] = defaultdict(list)
     for r in rows:
         if life.search(first(r)):
             per_author[first(r)].append(r)
-    best = {(fold(r["Title"].split("\n")[0]), fold(first(r))) for r in rows if "Best Books Ever" in r["Bookshelves"]}
+    best = {
+        (fold(r["Title"].split("\n")[0]), fold(first(r)))
+        for r in rows
+        if "Best Books Ever" in r["Bookshelves"]
+    }
     keep: dict[str, dict] = {}
-    for a, lst in per_author.items():
+    for _a, lst in per_author.items():
         if len(lst) < 20:
             continue
-        lst.sort(key=lambda r: (not ("Best Books Ever" in r["Bookshelves"]), "Classics of Literature" not in r["Bookshelves"], int(r["Text#"])))
+        lst.sort(
+            key=lambda r: (
+                "Best Books Ever" not in r["Bookshelves"],
+                "Classics of Literature" not in r["Bookshelves"],
+                int(r["Text#"]),
+            )
+        )
         for r in lst[:6]:
             keep[r["Text#"]] = r
     for r in rows:
@@ -68,7 +79,7 @@ def main(src: str) -> None:
             keep[r["Text#"]] = r
     out = []
     for r in sorted(keep.values(), key=lambda r: int(r["Text#"])):
-        name, death, cal = split_life_dates(first(r))
+        name, death, cal = split_life_dates(re.sub(r"\s*\[[^\]]*\]", "", first(r)))
         title = " — ".join(x.strip() for x in r["Title"].split("\n") if x.strip())[:140]
         shelves = r["Bookshelves"].split("; ")
         added = r["Issued"][:10]
@@ -86,7 +97,15 @@ def main(src: str) -> None:
         w = csv.DictWriter(f, fieldnames=list(out[0]))
         w.writeheader()
         w.writerows(out)
-    print(len(out), "rows ->", OUT, round(OUT.stat().st_size / 1e3), "KB;", len(Counter(o["author"] for o in out)), "authors")
+    print(
+        len(out),
+        "rows ->",
+        OUT,
+        round(OUT.stat().st_size / 1e3),
+        "KB;",
+        len(Counter(o["author"] for o in out)),
+        "authors",
+    )
 
 
 if __name__ == "__main__":

@@ -25,6 +25,8 @@ jobs:
           mkdir -p _site
           pocketshelf demo -o _site/index.html
           pocketshelf demo --arabic -o _site/arabic.html
-          cp docs/media/*.png docs/media/*.gif _site/ 2>/dev/null || true
+          cp docs/media/search.gif docs/media/hero.webp _site/
       - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
       - uses: actions/deploy-pages@v4

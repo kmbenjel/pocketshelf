@@ -42,17 +42,17 @@ Checked against each project's documentation on 2026-11-13 and, where marked **m
 | | pocketshelf | Calibre content server | Calibre catalog export | Calibre-Web | Kavita | Komga | Ubooquity | Kiwix |
 |---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 | Needs a server running to browse | **no** | yes [^cs] | no | yes [^cw] | yes | yes | yes | no (reads ZIM files) |
-| One offline file, opened from phone storage | **yes** | no | partial [^cat] | no | no | no | no | no (ZIM + app) |
-| Indexes your existing folder without importing or converting | **yes** | no (imports into its library) | no | no (needs a Calibre `metadata.db`) | yes | yes | yes | no (needs ZIM) |
+| One offline file, opened from phone storage | **yes** | no | partial [^cat] | no | no | no | no | no (ZIM files + app) |
+| Indexes your existing folder without importing or converting | **yes** | no (imports into its library) | no | no (needs a Calibre `metadata.db`) | – | yes (**measured**) | – | no (needs ZIM) |
 | Search ignores accents and Arabic hamza/ta marbuta variants | **yes** (tested) | Latin accents yes, Arabic hamza/alef no (**measured**) | – | – | – | Latin accents yes, Arabic hamza/alef no (**measured**) | – | – |
 | Right-to-left interface | **yes**, per-language setting | – | – | – | – | – | – | – |
-| Authors grouped by Hijri or Gregorian century | **yes** | no | no | no | no | no | no | no |
-| Editions of one work grouped | **yes** | no | no | no | no | no | no | no |
+| Authors grouped by Hijri or Gregorian century | **yes** | no built-in | no built-in | – | – | – | – | – |
+| Editions of one work grouped | **yes** | no built-in | no built-in | – | – | – | – | – |
 | Install size | **167 KB wheel**, no dependencies | **measured:** 229 MB download, 910 MB installed (9.18.0) | same | pip + Calibre library | 112 MB (v0.9.1.4) | 121 MB jar + Java (1.30.1) | – | 67 MB APK (3.14.1, arm64) |
 
 [^cs]: "A calibre process must be running" ([manual](https://manual.calibre-ebook.com/server.html)); full offline mode needs HTTPS.
 [^cw]: Python web app (`cps`, port 8083) over a Calibre library ([README](https://github.com/janeczku/calibre-web)).
-[^cat]: `calibredb catalog` writes static CSV, XML, EPUB or MOBI/AZW3 files; there is no search or filtering page.
+[^cat]: `calibredb catalog` writes static files (CSV measured: 2.4 s for 20,000 books); it is a list, not a searchable page.
 
 ### What is different, with evidence
 

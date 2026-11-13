@@ -16,13 +16,19 @@ export async function launch({ port = 9333, unit = 'pocketshelf-chrome' } = {}) 
   const direct = [CHROME, '--headless=new', '--disable-gpu', '--no-first-run', '--hide-scrollbars', '--no-sandbox', `--user-data-dir=${prof}`, `--remote-debugging-port=${port}`, '--remote-allow-origins=*', 'about:blank'];
   if (process.env.CI || process.env.PS_DIRECT_CHROME) spawn(direct[0], direct.slice(1), { stdio: 'ignore', detached: true }).unref();
   else spawn('systemd-run', args, { stdio: 'ignore', detached: true }).unref();
-  for (let i = 0; i < 60; i++) { try { await fetch(`http://127.0.0.1:${port}/json/version`); break; } catch { await sleep(250); } }
+  let ready = false;
+  for (let i = 0; i < 240 && !ready; i++) { try { await fetch(`http://127.0.0.1:${port}/json/version`); ready = true; } catch { await sleep(250); } }
+  if (!ready) throw new Error(`Chrome did not open its DevTools port ${port} within 60 s`);
   return { port, unit: `${unit}-${port}`, stop() {
     try { execFileSync('systemctl', ['--user', 'stop', `${unit}-${port}`], { stdio: 'ignore' }); } catch { try { execFileSync('pkill', ['-f', `remote-debugging-port=${port}`]); } catch {} } } };
 }
 
 export async function open(port, { width = 1280, height = 900, mobile = false, dark = false } = {}) {
-  const tab = await (await fetch(`http://127.0.0.1:${port}/json/new?about:blank`, { method: 'PUT' })).json();
+  let tab;
+  for (let i = 0; ; i++) {
+    try { tab = await (await fetch(`http://127.0.0.1:${port}/json/new?about:blank`, { method: 'PUT' })).json(); break; }
+    catch (e) { if (i >= 20) throw e; await sleep(250); }
+  }
   const ws = new WebSocket(tab.webSocketDebuggerUrl);
   await new Promise(r => ws.addEventListener('open', r));
   let id = 0; const pend = new Map();

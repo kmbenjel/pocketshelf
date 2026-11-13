@@ -50,13 +50,13 @@ Checked against each project's documentation on 2026-11-13 and, where marked **m
 | Editions of one work grouped | **yes** | no built-in | no built-in | – | – | – | – | – |
 | Install size | **167 KB wheel**, no dependencies | **measured:** 229 MB download, 910 MB installed (9.18.0) | same | pip + Calibre library | 112 MB (v0.9.1.4) | 121 MB jar + Java (1.30.1) | – | 67 MB APK (3.14.1, arm64) |
 
-[^cs]: "A calibre process must be running" ([manual](https://manual.calibre-ebook.com/server.html)); full offline mode needs HTTPS.
+[^cs]: The content server is a running calibre process (`calibre` or `calibre-server`); its offline mode needs HTTPS in typical browsers ([manual](https://manual.calibre-ebook.com/server.html)).
 [^cw]: Python web app (`cps`, port 8083) over a Calibre library ([README](https://github.com/janeczku/calibre-web)).
 [^cat]: `calibredb catalog` writes static files (CSV measured: 2.4 s for 20,000 books); it is a list, not a searchable page.
 
 ### What is different, with evidence
 
-1. **Nothing to run.** The output is one HTML file. `pocketshelf demo` produces a working catalog of 3,018 books in 0.2 s and 0.22 MB; open it with
+1. **Nothing to run.** The output is one HTML file. `pocketshelf demo` produces a working catalog of 3,018 books in half a second and 0.22 MB; open it with
    no network and no process.
 2. **It stays quick at 20,000 books.** Measured on a [public Project Gutenberg title list](bench/pg_catalog_to_csv.py) and on synthetic data (see
    [Benchmarks](#benchmarks)): about 1 MB of HTML, ready in 299 ms on a CPU throttled 4x to resemble a phone, searches in tens of milliseconds, and only the rows on screen exist in the DOM.
@@ -142,7 +142,7 @@ Head to head on the same 20,000 synthetic books, same VM:
 | | Calibre 9.18.0 | Komga 1.30.1 | pocketshelf |
 |---|---|---|---|
 | Download / installed | 229 MB / 910 MB | 121 MB jar + Java | 167 KB wheel |
-| Make 20,000 books searchable | 581 s (records via the Python API) | 44.8 s (scan of 20,000 PDFs) | 1.1 s (CSV), 5.0 s (folder of PDFs) |
+| Make 20,000 books searchable | 581 s (records via the Python API) | 44.8 s (scan of 20,000 PDFs) | 1.6 s (CSV), 5.0 s (folder of PDFs) |
 | Running cost while you browse | server: 191 MB resident | server: 1,036 MB resident | none: a browser tab and one file |
 | Static catalog export | CSV, 2.4 s, no search UI | none | the page itself |
 

@@ -26,8 +26,8 @@ Building from a *folder* of 20,000 one-page PDFs (reading each file's Info dicti
 | Step | Calibre 9.18.0 | Komga 1.30.1 | pocketshelf |
 |---|---|---|---|
 | Download / install | 229 MB download, 910 MB installed | 121 MB jar (+ a Java runtime) | 167 KB wheel, no dependencies |
-| Make the library searchable | 581 s to create 20,000 records through the Python API (metadata only, no files) | 44.8 s from start to all 20,000 PDFs listed | 1.1 s from CSV, 5.0 s from a folder of PDFs |
-| Output you carry to a phone | needs `calibre-server` running: 0.81 s to the first page, 191 MB resident | needs the Komga server running: 1,036 MB resident | one 0.86-1.0 MB HTML file, no process |
+| Make the library searchable | 581 s to create 20,000 records through the Python API (metadata only, no files) | 44.8 s from start to all 20,000 PDFs listed | 1.6 s from CSV, 5.0 s from a folder of PDFs |
+| Output you carry to a phone | needs `calibre-server` running: 0.81 s to the first page, 191 MB resident | needs the Komga server running: 1,036 MB resident | one 0.7 MB HTML file, no process |
 | Server-side search "river", 50 rows | 0.14 s (ids only) | 0.21 s (54 KB JSON) | in the page: 1-30 ms |
 | Static catalog export | `calibredb catalog` CSV: 2.4 s, 1.3 MB, 3 fields; no search UI | none | the HTML file |
 
@@ -43,8 +43,8 @@ Not measured: Calibre-Web, Kavita and Ubooquity (they need an interactive first-
 
 ## Raw output
 
-Lines from `bench/compare.sh` (20,000 books, steps run as `STEPS=...` in turn because the Komga step needed a UTF-8 locale; the first
-`calibredb catalog` call was malformed, so the CSV export was timed again by hand with the same library) and from `bench/browser_bench.sh`.
+Lines from `bench/compare.sh` (20,000 books, steps run as `STEPS=...` in turn; the CSV export line is the `calibredb catalog` command it
+shows, timed on the same library) and from `bench/browser_bench.sh`.
 
 ```
 {"tool":"pocketshelf","step":"build from 20000 PDFs","seconds":5.01,"output_bytes":700745}

@@ -32,7 +32,7 @@ pocketshelf build ~/Books --sidecar books.csv
 pocketshelf build catalog.csv -o catalog.html --lang ar
 ```
 
-الأعمدة كلها في [مواصفة الجدول](../../catalog-schema.md).
+الأعمدة كلها في [مواصفة الجدول](https://github.com/kmbenjel/pocketshelf/blob/main/docs/catalog-schema.md).
 
 ## الطبعات
 

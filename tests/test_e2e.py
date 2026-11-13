@@ -1,7 +1,8 @@
-"""Headless-Chrome checks of the real page. Skipped when node or Chrome are missing."""
+"""Headless-Chrome checks of the real page. Skipped when Node 22+ or Chrome are missing."""
 
 import json
 import os
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -16,7 +17,18 @@ CHROME = any(
     shutil.which(c) or os.path.exists(c)
     for c in ("/opt/google/chrome/chrome", "google-chrome", "chromium", "chromium-browser")
 )
-pytestmark = pytest.mark.skipif(not (shutil.which("node") and CHROME), reason="node and Chrome are needed")
+
+
+def node_major() -> int:
+    if not shutil.which("node"):
+        return 0
+    v = subprocess.run(["node", "--version"], capture_output=True, text=True).stdout
+    m = re.match(r"v(\d+)", v.strip())
+    return int(m.group(1)) if m else 0
+
+
+# scripts/chrome.mjs talks to Chrome with Node's built-in WebSocket (Node 22+)
+pytestmark = pytest.mark.skipif(not (node_major() >= 22 and CHROME), reason="Node 22+ and Chrome are needed")
 
 
 def fixture_books():
@@ -79,7 +91,8 @@ def test_page_in_chrome(tmp_path, compress):
     out.write_text(
         build_html(fixture_books(), "Fixture", "en", base="../lib/", compress=compress), encoding="utf-8"
     )
-    env = {**os.environ, "PS_DIRECT_CHROME": "1"} if os.environ.get("CI") else os.environ
+    direct = os.environ.get("CI") or not shutil.which("systemd-run")
+    env = {**os.environ, "PS_DIRECT_CHROME": "1"} if direct else os.environ
     r = subprocess.run(
         ["node", str(ROOT / "scripts/e2e.mjs"), str(out)],
         capture_output=True,

@@ -5,7 +5,7 @@ Thanks for helping. pocketshelf is small on purpose: Python standard library onl
 ```bash
 git clone https://github.com/kmbenjel/pocketshelf && cd pocketshelf
 uv venv && uv pip install -e ".[dev]"      # or: python -m venv .venv && pip install -e ".[dev]"
-pytest                                       # unit tests, and the real page in headless Chrome when Chrome and Node exist
+pytest                                       # unit tests, and the real page in headless Chrome when Chrome and Node 22+ exist
 ruff check . && ruff format --check .
 pocketshelf demo --open                      # look at your change
 ```

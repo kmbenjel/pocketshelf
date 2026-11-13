@@ -4,11 +4,18 @@ import sys
 from pathlib import Path
 
 from pocketshelf.catalog_io import write_catalog
+from pocketshelf.model import Book
 from pocketshelf.synth import synthetic_books
 
 n, out = int(sys.argv[1]), Path(sys.argv[2])
 lib = out / "library"
 books = synthetic_books(n)
+# probes for the search-folding comparison: an accented Latin title and an Arabic title with hamza/alef variants
+books[0:3] = [
+    Book(title="Les Misérables", author="Hugo, Victor", category="Fiction", lang="fr"),
+    Book(title="إحياء علوم الدين", author="الغزالي", category="Sufism", lang="ar"),
+    Book(title="Œuvres complètes", author="Rousseau, Jean-Jacques", category="Philosophy", lang="fr"),
+]
 PDF = b"%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 200 200]>>endobj\ntrailer<</Root 1 0 R/Size 4>>\n%%EOF\n"
 for i, b in enumerate(books):
     stem = f"{b.title[:50]} - {b.author.split(',')[0]} {i}"

@@ -447,14 +447,17 @@ function openWork(id, push = true) {
   const b0 = w.rep, a = b0.a >= 0 ? A[b0.a] : null;
   let h = `<h2><bdi>${esc(b0.t)}</bdi></h2>`;
   if (a) h += `<p class="by"><button type="button" data-pa="${a.i}" title="${esc(tr('pick_author'))}"><bdi>${esc(a.n)}</bdi></button>${a.d ? ' · ' + esc(lifeLabel(a)) : ''}</p>`;
+  const multi = w.bs.length > 1, cats = new Set(w.bs.map(b => b.c));
+  const catBtn = c => `<button type="button" style="all:unset;cursor:pointer;color:var(--accent);text-decoration:underline" data-pc="${esc(D.c[c])}" title="${esc(tr('pick_cat'))}">${esc(D.c[c].split('/').join(' › '))}</button>`;
+  if (cats.size === 1 && b0.c >= 0) h += `<p class="small" style="margin:-4px 0 12px">${catBtn(b0.c)}</p>`;
   w.bs.forEach((b, k) => {
     const d = b.d, label = [d.ed, d.e, d.p, b.y || ''].filter(Boolean).join(' · ');
-    const cat = b.c >= 0 ? `<button type="button" class="by" style="all:unset;cursor:pointer;color:var(--accent);text-decoration:underline" data-pc="${esc(D.c[b.c])}" title="${esc(tr('pick_cat'))}">${esc(D.c[b.c].split('/').join(' › '))}</button>` : '';
-        h += `<div class="${w.bs.length > 1 ? 'ed-card' : ''}">${w.bs.length > 1 ? `<h3>${esc(tr('edition'))} ${k + 1}${label ? ' · ' + esc(label) : ''}</h3>` : ''}${filesHTML(b)}${kv([
-      [tr('editor'), d.e], [tr('publisher'), [d.p, d.pl].filter(Boolean).join(' – ')], [tr('edition'), d.ed], [tr('pubyear'), b.y || ''], [tr('series'), d.s], [tr('isbn'), d.i],
-      [tr('pages'), d.pg ? num(d.pg) : ''],       [tr('format'), b.f >= 0 ? D.f[b.f].toUpperCase() : ''], [tr('language'), b.l >= 0 ? D.l[b.l].toUpperCase() : ''], [tr('size'), bytes(b.s)],
+    const single = !Array.isArray(b.fl);
+    h += `<div class="${multi ? 'ed-card' : ''}">${multi ? `<h3>${esc(tr('edition'))} ${k + 1}${label ? ' · ' + esc(label) : ''}</h3>` : ''}${filesHTML(b)}${kv([
+      [tr('editor'), d.e], [tr('publisher'), [d.p, d.pl].filter(Boolean).join(' – ')], [tr('edition'), multi ? '' : d.ed], [tr('pubyear'), multi && label.includes(String(b.y)) ? '' : b.y || ''], [tr('series'), d.s], [tr('isbn'), d.i],
+      [tr('pages'), d.pg ? num(d.pg) : ''], [tr('format'), single ? '' : b.f >= 0 ? D.f[b.f].toUpperCase() : ''], [tr('language'), b.l >= 0 && !(multi && k) ? D.l[b.l].toUpperCase() : ''], [tr('size'), single ? '' : bytes(b.s)],
       [tr('tags'), (d.t || []).join(' · ')], [tr('notes'), d.n], [tr('ids'), d.x ? Object.entries(d.x).map(([k2, v]) => k2 + ': ' + v).join(' · ') : ''],
-    ])}${cat ? `<dl class="kv"><dt>${esc(tr('category'))}</dt><dd>${cat}</dd></dl>` : ''}</div>`;
+    ])}${cats.size > 1 && b.c >= 0 ? `<dl class="kv"><dt>${esc(tr('category'))}</dt><dd>${catBtn(b.c)}</dd></dl>` : ''}</div>`;
   });
   showSheet(h);
   S.open = String(id); writeHash(push);

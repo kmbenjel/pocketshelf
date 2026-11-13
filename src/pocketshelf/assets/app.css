@@ -150,6 +150,7 @@ ul.vols small{color:var(--muted)}
   .tabs button[aria-current=page]{background:var(--line)}
   .tabs svg{width:18px;height:18px}
   main{padding-bottom:40px}
+  .scrim{background:#0b121147}
   .panel{inset-inline:auto;inset-inline-end:0;top:0;bottom:0;max-height:none;width:min(560px,92vw);border-radius:0;animation:side .2s ease-out}
   @keyframes side{from{transform:translateX(24px);opacity:0}}
   [dir=rtl] .panel{animation-name:sider}

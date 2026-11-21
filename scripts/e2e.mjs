@@ -55,6 +55,8 @@ async function small() {
   // the real search box: typing, highlight, direction of an Arabic query in an English interface
   await type('emma');
   eq('typing filters the list', await titles(), ['Emma']);
+  eq('a title in another language than the interface is marked', await p.eval(`(()=>{window.__pocketshelf.search('miserables');return document.querySelector('.row .t').lang})()`), 'fr');
+  await type('emma');
   yes('results show highlight', await p.eval(`document.querySelectorAll('.row mark').length > 0`));
   yes('editions badge', (await p.eval(`document.querySelector('.tag.ed')?.textContent`) || '').includes('2'));
   await type('الغزالي');

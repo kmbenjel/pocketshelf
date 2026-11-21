@@ -157,6 +157,13 @@ async function small() {
   await click('.row[data-w]'); await p.waitFor(`!document.getElementById('sheet').hidden`, 'the book panel');
   eq('no injected elements', await p.eval(`document.querySelectorAll('.row img, #panel img, #panel script').length`), 0);
   eq('script text stays text', await p.eval(`window.__injected === undefined`), true);
+
+  // a viewer that runs no scripts (a file preview) shows what to do instead of an endless «…»
+  await p.send('Emulation.setScriptExecutionDisabled', { value: true });
+  await p.send('Page.navigate', { url: 'file://' + file });
+  await p.waitFor(`!!document.querySelector('noscript .boot')`, 'the page without scripts');
+  eq('without scripts the page explains itself', await p.eval(`[/JavaScript/.test(document.querySelector('noscript .boot').textContent), getComputedStyle(document.getElementById('boot')).display]`), [true, 'none']);
+  await p.send('Emulation.setScriptExecutionDisabled', { value: false });
 }
 
 async function large() {

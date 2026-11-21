@@ -27,7 +27,8 @@ const T = {
     quality: 'What the catalog knows', with_author: 'with an author', with_year: 'with a year', with_cat: 'with a category', with_file: 'with a file',
     with_death: 'authors with a death year', multi: 'books with several editions', loading_err: 'This browser cannot read the catalog (it needs DecompressionStream). Rebuild with --no-compress or update the browser.',
     ah: 'AH', ce: 'CE', bce: 'BCE', cent: n => ordEn(n) + ' c.', jump: 'Jump to century', books_n: { one: '{n} book', other: '{n} books' },
-    pick_author: 'Show only this author', pick_cat: 'Show this category',
+    pick_author: 'Show only this author', pick_cat: 'Show this category', views: 'Views', remove: 'Remove the filter: {x}', aka: 'Also known as',
+    content_hint: 'If the book does not open: this page was opened through the file manager. Open it by its file address instead: type file:///sdcard/ in the address bar, browse to this page and bookmark it.',
   },
   ar: {
     dir: 'rtl', name: 'العربية', search: 'ابحث في الكتب والمؤلفين…', filters: 'تصفية', settings: 'الإعدادات', sort: 'الترتيب',
@@ -47,7 +48,8 @@ const T = {
     quality: 'ما يعرفه الفهرس', with_author: 'لها مؤلف', with_year: 'لها سنة', with_cat: 'لها قسم', with_file: 'لها ملف',
     with_death: 'مؤلفون لهم سنة وفاة', multi: 'كتب بطبعات متعددة', loading_err: 'لا يستطيع هذا المتصفح قراءة الفهرس (يحتاج DecompressionStream). أعد البناء بخيار --no-compress أو حدّث المتصفح.',
     ah: 'هـ', ce: 'م', bce: 'ق.م', cent: n => 'القرن ' + n, jump: 'اقفز إلى قرن', books_n: { one: 'كتاب واحد', two: 'كتابان', few: '{n} كتب', many: '{n} كتابًا', other: '{n} كتاب' },
-    pick_author: 'اعرض هذا المؤلف فقط', pick_cat: 'اعرض هذا القسم',
+    pick_author: 'اعرض هذا المؤلف فقط', pick_cat: 'اعرض هذا القسم', views: 'طرق العرض', remove: 'أزل التصفية: {x}', aka: 'عناوين أخرى',
+    content_hint: 'إن لم يُفتح الكتاب: فُتحت هذه الصفحة من مدير الملفات. افتحها بعنوان ملفها: اكتب file:///sdcard/ في شريط العنوان، ثم تصفّح إلى هذه الصفحة واحفظها في المفضلة.',
   },
   fr: {
     dir: 'ltr', name: 'Français', search: 'Titre, auteur…', filters: 'Filtres', settings: 'Réglages', sort: 'Tri',
@@ -66,7 +68,8 @@ const T = {
     quality: 'Ce que le catalogue sait', with_author: 'avec auteur', with_year: 'avec année', with_cat: 'avec catégorie', with_file: 'avec fichier',
     with_death: 'auteurs avec année de décès', multi: 'livres en plusieurs éditions', loading_err: 'Ce navigateur ne peut pas lire le catalogue (DecompressionStream requis). Reconstruisez avec --no-compress ou mettez à jour le navigateur.',
     ah: 'H', ce: 'EC', bce: 'av. J.-C.', cent: n => (n === 1 ? '1er' : n + 'e') + ' s.', jump: 'Aller au siècle', books_n: { one: '{n} livre', other: '{n} livres' },
-    pick_author: 'Voir seulement cet auteur', pick_cat: 'Voir cette catégorie',
+    pick_author: 'Voir seulement cet auteur', pick_cat: 'Voir cette catégorie', views: 'Vues', remove: 'Retirer le filtre : {x}', aka: 'Autres titres',
+    content_hint: 'Si le livre ne s’ouvre pas : cette page a été ouverte depuis le gestionnaire de fichiers. Ouvrez-la par son adresse de fichier : tapez file:///sdcard/ dans la barre d’adresse, naviguez jusqu’à cette page et ajoutez-la aux favoris.',
   },
 };
 function ordEn(n) { const m = n % 100; if (m >= 11 && m <= 13) return n + 'th'; return n + ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] || 'th'); }
@@ -115,39 +118,58 @@ for (const w of W) {
 }
 // The folded search texts are built lazily (right after the first paint, or at the first query): the page opens
 // before the index exists, which is what keeps a 20,000-book catalog quick to open on a phone.
-let indexed = false;
-function buildIndex() {
-  if (indexed) return; indexed = true;
-  for (const a of A) a.f = fold(a.n);
-  for (const b of B) { b.tf = fold(b.t); b.af = b.a >= 0 ? A[b.a].f : ''; }
-  for (const w of W) {
-    const parts = [];
-    for (const b of w.bs) parts.push(b.tf, b.af, fold([b.d.e, b.d.p, b.d.pl, b.d.ed, b.d.s, b.d.i, (b.d.t || []).join(' '), b.d.x ? Object.values(b.d.x).join(' ') : '', b.c >= 0 ? D.c[b.c] : ''].join(' ')));
-    w.h = parts.join(' ');
+// It is built in short slices so that scrolling and typing stay smooth while it grows; a query finishes it at once.
+let ixAuthors = false, ixWorks = 0;
+const DETAILS = ['e', 'p', 'pl', 'ed', 's', 'i'], catFold = [];
+function indexSome(budgetMs) {
+  const t = budgetMs ? performance.now() : 0;
+  if (!ixAuthors) { for (const a of A) a.f = fold(a.n); ixAuthors = true; }
+  for (; ixWorks < W.length; ixWorks++) {
+    if (budgetMs && (ixWorks & 63) === 0 && performance.now() - t > budgetMs) return false;
+    const w = W[ixWorks]; let h = '';
+    for (const b of w.bs) {
+      const d = b.d; let x = '';
+      b.tf = fold(b.t); b.af = b.a >= 0 ? A[b.a].f : '';
+      for (const k of DETAILS) if (d[k]) x += ' ' + d[k];
+      if (d.at) x += ' ' + d.at.join(' ');
+      if (d.t) x += ' ' + d.t.join(' ');
+      if (d.x) x += ' ' + Object.values(d.x).join(' ');
+      if (b.c >= 0 && catFold[b.c] === undefined) catFold[b.c] = fold(D.c[b.c]);
+      h += (h ? ' ' : '') + b.tf + ' ' + b.af + (x ? ' ' + fold(x) : '') + (b.c >= 0 ? ' ' + catFold[b.c] : '');
+    }
+    w.h = h;
   }
+  return true;
 }
+const buildIndex = () => { indexSome(0); };
+const indexInBackground = () => { if (!indexSome(8)) setTimeout(indexInBackground, 0); };
 const HASFILES = B.some(b => b.fl && b.fl.length);
 const tModel = performance.now() - t0 - tLoad;
 const catPaths = D.c.map(c => c.split('/'));
 
 /* ------------------------------------------------------------------------------------------------ state */
 const S = { view: 'browse', q: '', cat: '', author: -1, lang: '', fmt: '', cent: '', multi: false, sort: 'rel', open: '' };
+const SORTS = ['rel', 'title', 'author', 'year', 'size', 'added'];
+// A hash can be a bookmark made before the catalog was rebuilt: every value is checked against the data.
 function readHash() {
   const p = new URLSearchParams(location.hash.slice(1));
+  const idx = (k, n) => { const v = p.get(k); return v !== null && /^\d+$/.test(v) && +v < n ? +v : -1; };
   S.view = ['browse', 'cats', 'authors', 'stats'].includes(p.get('v')) ? p.get('v') : 'browse';
-  S.q = p.get('q') || ''; S.cat = p.get('cat') || ''; S.author = p.has('au') ? +p.get('au') : -1;
-  S.lang = p.get('lg') || ''; S.fmt = p.get('fm') || ''; S.cent = p.get('ce') || ''; S.multi = p.get('mu') === '1';
-  S.sort = p.get('so') || 'rel'; S.open = p.get('b') || '';
+  S.q = p.get('q') || ''; S.cat = p.get('cat') || ''; S.author = idx('au', A.length);
+  S.lang = p.get('lg') || ''; S.fmt = p.get('fm') || ''; S.cent = /^(ah|ce):-?\d+$/.test(p.get('ce') || '') ? p.get('ce') : ''; S.multi = p.get('mu') === '1';
+  S.sort = SORTS.includes(p.get('so')) ? p.get('so') : 'rel'; S.open = idx('b', W.length) >= 0 ? p.get('b') : '';
 }
-function writeHash(push) {
+// `state` marks a history entry that exists only to hold an open panel, so that Back closes the panel.
+function writeHash(push, state) {
   const p = new URLSearchParams();
   if (S.view !== 'browse') p.set('v', S.view);
   if (S.q) p.set('q', S.q); if (S.cat) p.set('cat', S.cat); if (S.author >= 0) p.set('au', S.author);
   if (S.lang) p.set('lg', S.lang); if (S.fmt) p.set('fm', S.fmt); if (S.cent) p.set('ce', S.cent); if (S.multi) p.set('mu', '1');
   if (S.sort !== 'rel') p.set('so', S.sort); if (S.open) p.set('b', S.open);
   const h = p.toString() ? '#' + p.toString() : location.pathname + location.search;
-  try { push ? history.pushState(null, '', h) : history.replaceState(null, '', h); } catch (_) {}
+  try { push ? history.pushState(state || null, '', h) : history.replaceState(state === undefined ? history.state : state, '', h); } catch (_) {}
 }
+const inPanelEntry = () => { try { return !!(history.state && history.state.panel); } catch (_) { return false; } };
 readHash();
 
 /* ------------------------------------------------------------------------------------------------ helpers */
@@ -165,7 +187,8 @@ const tr = (k, o) => {
 const bytes = n => n >= 1e9 ? (n / 1e9).toFixed(1) + ' GB' : n >= 1e6 ? (n / 1e6).toFixed(n < 1.6e7 ? 1 : 0) + ' MB' : n >= 1e3 ? Math.round(n / 1e3) + ' KB' : n ? n + ' B' : '';
 const centLabel = (c, cal) => c === 0 ? tr('unknown') : c < 0 ? tr('cent', -c) + ' ' + tr('bce') : tr('cent', c) + ' ' + tr(cal);
 const lifeLabel = a => !a.d ? '' : tr('died', { y: Math.abs(a.d) + ' ' + (a.d < 0 ? tr('bce') : tr(a.cal)) }) + (a.cal === 'ah' ? ' (' + ceOf(a.d, 'ah') + ' ' + tr('ce') + ')' : '');
-const href = p => /^[a-z][a-z0-9+.-]*:/i.test(p) ? p : (D.m.base || '') + p.split('/').map(encodeURIComponent).join('/');
+const ABS_URL = /^[a-z][a-z0-9+.-]*:\/\//i;        // "https://…" is a link as it stands; "Dune: Messiah.epub" is a file name
+const href = p => ABS_URL.test(p) ? p : (D.m.base || '') + p.split('/').map(encodeURIComponent).join('/');
 const svg = d => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
 const ICON = {
   books: svg('<path d="M5 4h4v16H5zM11 4h4v16h-4zM17.5 5.5l3.5 1-4 14-3.5-1z"/>'),
@@ -184,17 +207,34 @@ function computeCatSet() {
   catSet = new Set(); D.c.forEach((c, i) => { if (c === S.cat || c.startsWith(S.cat + '/')) catSet.add(i); });
 }
 let RES = [];
-function matchWork(w, toks) {
-  for (let i = 0; i < toks.length; i++) if (w.h.indexOf(toks[i]) < 0) return false;
-  return true;
+// The words of a query, each with the other spellings that count as the same word:
+// «عبدالله» is also written «عبد الله», and «ابن» between two names is written «بن».
+function queryWords(q) {
+  return fold(q).split(' ').filter(Boolean).map(t => {
+    if (t.length > 5 && t.startsWith('عبدال')) return [t, 'عبد ' + t.slice(3)];
+    return t === 'ابن' ? [t, 'بن'] : [t];
+  });
+}
+const hasWord = (text, alts) => { for (let i = 0; i < alts.length; i++) if (text.indexOf(alts[i]) >= 0) return true; return false; };
+const hasWords = (text, words) => { for (let i = 0; i < words.length; i++) if (!hasWord(text, words[i])) return false; return true; };
+const byText = (x, y) => x < y ? -1 : x > y ? 1 : 0;   // folded texts sort well by code point; no collator needed
+// Authors are ranked once by their folded names; sorting books by author is then a sort of whole numbers.
+let authorRank = null;
+function rankAuthors() {
+  if (authorRank) return authorRank;
+  authorRank = new Int32Array(A.length);
+  A.map(a => a.i).sort((x, y) => byText(A[x].f, A[y].f)).forEach((ai, r) => { authorRank[ai] = r; });
+  return authorRank;
 }
 function filterWorks() {
   computeCatSet();
-  const toks = fold(S.q).split(' ').filter(Boolean);
-  if (toks.length || S.sort === 'author') buildIndex();
+  const toks = queryWords(S.q), n = toks.length;
+  const plain = toks.every(a => a.length === 1) ? toks.map(a => a[0]) : null;   // the usual case: no second spelling to try
+  if (n || S.sort === 'author') buildIndex();
   const out = [];
   for (const w of W) {
-    if (toks.length && !matchWork(w, toks)) continue;
+    if (plain) { const h = w.h; let i = 0; while (i < n && h.indexOf(plain[i]) >= 0) i++; if (i < n) continue; }
+    else if (!hasWords(w.h, toks)) continue;
     if (S.multi && w.bs.length < 2) continue;
     if (catSet || S.author >= 0 || S.lang || S.fmt || S.cent) {
       let ok = false;
@@ -211,18 +251,27 @@ function filterWorks() {
     out.push(w);
   }
   if (toks.length && S.sort === 'rel') {
+    // scores are small whole numbers and `out` is in title order: one pass into buckets ranks it
+    const whole = toks.map(a => a[0]).join(' '), buckets = [];
     for (const w of out) {
       let s = 0;
-      for (const tk of toks) {
-        const p = w.rep.tf.indexOf(tk);
-        if (p === 0) s += 6; else if (p > 0 && w.rep.tf[p - 1] === ' ') s += 4; else if (p > 0) s += 2;
-        else if (w.rep.af.indexOf(tk) >= 0) s += 2;
+      const tf = w.rep.tf, af = w.rep.af;
+      for (let k = 0; k < n; k++) {
+        const alts = toks[k];
+        let p = tf.indexOf(alts[0]);
+        for (let i = 1; i < alts.length && p < 0; i++) p = tf.indexOf(alts[i]);
+        if (p === 0) s += 6; else if (p > 0 && tf.charCodeAt(p - 1) === 32) s += 4; else if (p > 0) s += 2;
+        else if (hasWord(af, alts)) s += 2;
       }
-      if (w.rep.tf === toks.join(' ')) s += 10;
-      w.score = s;
+      if (tf === whole) s += 10;
+      (buckets[s] || (buckets[s] = [])).push(w);
     }
-    out.sort((a, b) => b.score - a.score || a.id - b.id);
-  } else if (S.sort === 'author') out.sort((a, b) => (a.rep.af || '￿').localeCompare(b.rep.af || '￿') || a.id - b.id);
+    out.length = 0;
+    for (let s = buckets.length - 1; s >= 0; s--) if (buckets[s]) for (const w of buckets[s]) out.push(w);
+  } else if (S.sort === 'author') {
+    const rank = rankAuthors(), last = A.length, key = w => w.rep.a >= 0 ? rank[w.rep.a] : last;   // books without an author go last
+    out.sort((a, b) => key(a) - key(b) || a.id - b.id);
+  }
   else if (S.sort === 'year') out.sort((a, b) => (b.year || -1) - (a.year || -1) || a.id - b.id);
   else if (S.sort === 'size') out.sort((a, b) => b.size - a.size || a.id - b.id);
   else if (S.sort === 'added') out.sort((a, b) => b.mt - a.mt || a.id - b.id);
@@ -230,7 +279,7 @@ function filterWorks() {
 }
 
 /* ------------------------------------------------------------------------------------------ virtual list */
-const VL = { rows: [], offs: [0], total: 0, first: -1, last: -1, ver: 0 };
+const VL = { rows: [], offs: [0], total: 0, first: -1, last: -1, ver: 0, drawn: -1 };
 const host = $('vl'), inner = $('vl-in');
 function setRows(rows, heights) {
   VL.rows = rows; VL.offs = new Array(rows.length + 1); VL.offs[0] = 0;
@@ -245,12 +294,25 @@ function renderVL(force) {
   const y0 = Math.max(0, -top - over), y1 = Math.min(VL.total, -top + vh + over);
   const first = findRow(y0), last = Math.min(VL.rows.length, findRow(y1) + 1);
   if (!force && first === VL.first && last === VL.last) return;
-  VL.first = first; VL.last = last;
+  // the rows are rebuilt as the window moves: a row that has the keyboard focus gets it back
+  const act = document.activeElement;
+  const keep = VL.drawn === VL.ver && act && act.parentNode === inner ? VL.first + [...inner.children].indexOf(act) : -1;
+  VL.first = first; VL.last = last; VL.drawn = VL.ver;
   inner.style.paddingTop = VL.offs[first] + 'px';
   inner.style.height = VL.total + 'px';
   let h = '';
   for (let i = first; i < last; i++) h += rowHTML(VL.rows[i]);
   inner.innerHTML = h;
+  if (keep >= first && keep < last) inner.children[keep - first].focus({ preventScroll: true });
+}
+// Move the keyboard focus to the row at index i (skipping century headings in the direction of travel).
+function focusRow(i, step) {
+  while (i >= 0 && i < VL.rows.length && VL.rows[i].k === 'hd') i += step;
+  if (i < 0 || i >= VL.rows.length) return false;
+  if (i < VL.first || i >= VL.last) { window.scrollTo(0, host.getBoundingClientRect().top + scrollY + VL.offs[i] - 160); renderVL(true); }
+  const el = inner.children[i - VL.first];
+  if (el) el.focus();
+  return !!el;
 }
 let raf = 0;
 const onScroll = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; renderVL(); }); };
@@ -281,7 +343,7 @@ function rowHTML(r) {
   }
   if (r.k === 'cat') {
     const pad = 12 + r.depth * 20;
-    return `<article class="row cat" role="button" tabindex="0" data-cat="${esc(r.path)}" style="--h:${hueOf(r.path.split('/')[0])};padding-inline-start:${pad + 6}px"><span class="car ${r.open ? 'open' : ''}" data-tg="${esc(r.path)}">${r.kids ? '›' : ''}</span><span class="t"><bdi>${hl(r.name)}</bdi></span><span class="n">${num(r.n)}</span></article>`;
+    return `<article class="row cat" role="button" tabindex="0"${r.kids ? ` aria-expanded="${r.open}"` : ''} data-cat="${esc(r.path)}" style="--h:${hueOf(r.path.split('/')[0])};padding-inline-start:${pad + 6}px"><span class="car ${r.open ? 'open' : ''}" data-tg="${esc(r.path)}" aria-hidden="true">${r.kids ? '›' : ''}</span><span class="t"><bdi>${hl(r.name)}</bdi></span><span class="n">${num(r.n)}</span></article>`;
   }
   return '';
 }
@@ -306,11 +368,11 @@ function buildTree() {
 }
 function catRows() {
   TREE = TREE || buildTree();
-  const toks = fold(S.q).split(' ').filter(Boolean), rows = [];
-  const matches = n => toks.every(t => fold(n.path).indexOf(t) >= 0);
+  const toks = queryWords(S.q), rows = [], coll = new Intl.Collator(lang);
+  const matches = n => hasWords(n.f === undefined ? (n.f = fold(n.path)) : n.f, toks);
   const anyMatch = n => matches(n) || [...n.kids.values()].some(anyMatch);
   const walk = (node, depth) => {
-    const kids = [...node.kids.values()].sort((a, b) => a.name.localeCompare(b.name, lang));
+    const kids = [...node.kids.values()].sort((a, b) => coll.compare(a.name, b.name));
     for (const k of kids) {
       if (toks.length && !anyMatch(k)) continue;
       const open = toks.length ? true : expanded.has(k.path);
@@ -322,12 +384,12 @@ function catRows() {
   return rows;
 }
 function authorRows() {
-  const toks = fold(S.q).split(' ').filter(Boolean);
+  const toks = queryWords(S.q);
   buildIndex();
   const nb = new Map(); for (const b of B) if (b.a >= 0) nb.set(b.a, (nb.get(b.a) || 0) + 1);
   const groups = new Map();
   for (const a of A) {
-    if (!nb.has(a.i) || (toks.length && !toks.every(t => a.f.indexOf(t) >= 0))) continue;
+    if (!nb.has(a.i) || (toks.length && !hasWords(a.f, toks))) continue;
     a.nb = nb.get(a.i);
     const key = a.ck || 'none';
     if (!groups.has(key)) groups.set(key, { key, sort: a.sort, label: a.d ? centLabel(a.c, a.cal) : tr('unknown'), list: [] });
@@ -336,7 +398,7 @@ function authorRows() {
   const gs = [...groups.values()].sort((x, y) => x.sort - y.sort);
   const rows = []; RIB = [];
   for (const g of gs) {
-    g.list.sort((x, y) => x.f.localeCompare(y.f));
+    g.list.sort((x, y) => byText(x.f, y.f));
     RIB.push({ label: g.label, n: g.list.length, at: rows.length });
     rows.push({ k: 'hd', label: g.label, n: g.list.length });
     for (const a of g.list) rows.push({ k: 'au', a });
@@ -347,7 +409,7 @@ let RIB = [];
 
 function render(reset) {
   const v = S.view;
-  TOK = fold(S.q).split(' ').filter(Boolean);
+  TOK = queryWords(S.q).flat();
   $('stats').hidden = v !== 'stats'; host.hidden = v === 'stats';
   $('sortbox').hidden = v !== 'browse';
   document.querySelectorAll('[data-v]').forEach(b => b.setAttribute('aria-current', b.dataset.v === v ? 'page' : 'false'));
@@ -382,7 +444,7 @@ function emptyHTML() { return `<div class="empty"><h2>${esc(tr('no_results'))}</
 
 function renderActive() {
   const pills = [];
-  const add = (k, label) => pills.push(`<span class="pill"><span>${esc(label)}</span><button type="button" data-rm="${k}" aria-label="${esc(tr('close'))}">×</button></span>`);
+  const add = (k, label) => pills.push(`<span class="pill"><span>${esc(label)}</span><button type="button" data-rm="${k}" aria-label="${esc(tr('remove', { x: label }))}">×</button></span>`);
   if (S.view === 'browse') {
     if (S.cat) add('cat', S.cat.split('/').join(' › '));
     if (S.author >= 0) add('author', A[S.author].n);
@@ -399,28 +461,39 @@ function renderActive() {
 
 /* ---------------------------------------------------------------------------------------------- stats */
 function renderStats() {
-  const books = B.length, works = W.length, files = B.reduce((n, b) => n + (Array.isArray(b.fl) ? b.fl.length : b.fl ? 1 : 0), 0);
-  const size = B.reduce((n, b) => n + b.s, 0);
-  const cnt = (keyf) => { const m = new Map(); for (const b of B) { const k = keyf(b); if (k !== null && k !== undefined && k !== '') m.set(k, (m.get(k) || 0) + 1); } return [...m.entries()].sort((a, b) => b[1] - a[1]); };
+  const books = B.length, works = W.length;
+  const count = (m, k) => m.set(k, (m.get(k) || 0) + 1), ranked = m => [...m.entries()].filter(e => e[0] !== '').sort((x, y) => y[1] - x[1]);
+  const regroup = (m, keyf) => { const out = new Map(); m.forEach((n, i) => out.set(keyf(i), (out.get(keyf(i)) || 0) + n)); return out; };
+  const mCat = new Map(), mFmt = new Map(), mLang = new Map(), mDec = new Map(), nb = new Map(), big = [];
+  let files = 0, size = 0, withAuthor = 0, withYear = 0, withCat = 0, withFile = 0;
+  for (const b of B) {                                  // one pass over the books feeds every figure on the page
+    const nf = Array.isArray(b.fl) ? b.fl.length : b.fl ? 1 : 0;
+    files += nf; size += b.s;
+    if (nf) withFile++;
+    if (b.y) withYear++;
+    if (b.a >= 0) { withAuthor++; count(nb, b.a); }
+    if (b.c >= 0) { withCat++; count(mCat, b.c); }
+    if (b.f >= 0) count(mFmt, b.f);
+    if (b.l >= 0) count(mLang, b.l);
+    if (b.y > 1000) count(mDec, Math.floor(b.y / 10) * 10);
+    if (b.s && (big.length < 5 || b.s > big[4].s)) { big.push(b); big.sort((x, y) => y.s - x.s); if (big.length > 5) big.pop(); }
+  }
   const bars = (list, max, hue) => { const mx = Math.max(1, ...list.map(x => x[1])); return `<div class="bars">${list.slice(0, max).map(([k, n]) => `<div class="bar"><span class="l"><bdi>${esc(k)}</bdi></span><span class="tr"><i style="width:${Math.max(2, 100 * n / mx)}%;--h:${hue ?? hueOf(String(k))}"></i></span><span class="v">${num(n)}</span></div>`).join('')}</div>`; };
   const pct = (n, of) => of ? Math.round(100 * n / of) + '%' : '0%';
-  const withAuthor = B.filter(b => b.a >= 0).length, withYear = B.filter(b => b.y).length, withCat = B.filter(b => b.c >= 0).length, withFile = B.filter(b => b.fl && b.fl.length).length;
   const aDeath = A.filter(a => a.d).length, multi = W.filter(w => w.bs.length > 1).length;
-  const bycat = cnt(b => b.c >= 0 ? topCat(b.c) : '');
-  const byfmt = cnt(b => b.f >= 0 ? D.f[b.f].toUpperCase() : ''), bylang = cnt(b => b.l >= 0 ? D.l[b.l].toUpperCase() : '');
+  const bycat = ranked(regroup(mCat, topCat));
+  const byfmt = ranked(regroup(mFmt, i => D.f[i].toUpperCase())), bylang = ranked(regroup(mLang, i => D.l[i].toUpperCase()));
   const cents = new Map(); for (const a of A) if (a.d) { const k = a.ck; if (!cents.has(k)) cents.set(k, { n: 0, a }); cents.get(k).n++; }
   const cl = [...cents.values()].sort((x, y) => x.a.sort - y.a.sort);
   const mxC = Math.max(1, ...cl.map(c => c.n));
-  const dec = cnt(b => b.y > 1000 ? Math.floor(b.y / 10) * 10 : null).sort((a, b) => a[0] - b[0]);
-  const big = [...B].sort((a, b) => b.s - a.s).slice(0, 5).filter(b => b.s);
-  const nb = new Map(); for (const b of B) if (b.a >= 0) nb.set(b.a, (nb.get(b.a) || 0) + 1);
-  const topA = [...nb.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([i, n]) => [A[i].n, n]);
+  const dec = [...mDec.entries()].sort((x, y) => x[0] - y[0]), mxD = Math.max(1, ...dec.map(x => x[1]));
+  const topA = [...nb.entries()].sort((x, y) => y[1] - x[1]).slice(0, 8).map(([i, n]) => [A[i].n, n]);
   const kp = (n, l) => `<div class="kpi"><b>${n}</b><span>${esc(l)}</span></div>`;
   const q = (n, l) => `<div class="bar"><span class="l">${esc(l)}</span><span class="tr"><i style="width:${books ? 100 * n / books : 0}%;--h:150"></i></span><span class="v">${pct(n, books)}</span></div>`;
   $('stats').innerHTML = `<div class="kpis">${kp(num(works), tr('browse'))}${files ? kp(num(files), tr('files')) : ''}${size ? kp(bytes(size), tr('total_size')) : ''}${kp(num(A.length), tr('authors'))}${kp(num(D.c.length), tr('categories'))}</div>
   ${bycat.length ? `<section class="card"><h2>${esc(tr('by_cat'))}</h2>${bars(bycat, 12)}</section>` : ''}
   ${cl.length ? `<section class="card"><h2>${esc(tr('by_cent'))}</h2><div class="cols">${cl.map(c => `<div title="${esc(centLabel(c.a.c, c.a.cal))}: ${c.n}"><em>${c.n}</em><i style="height:${Math.max(3, 82 * c.n / mxC)}px"></i><em>${c.a.c < 0 ? -c.a.c + 'b' : c.a.c}${c.a.cal === 'ah' ? 'ه' : ''}</em></div>`).join('')}</div></section>` : ''}
-  ${dec.length > 1 ? `<section class="card"><h2>${esc(tr('by_year'))}</h2><div class="cols">${dec.map(([d, n]) => `<div title="${d}s: ${n}"><em>${n}</em><i style="height:${Math.max(3, 82 * n / Math.max(...dec.map(x => x[1])))}px"></i><em>${String(d).slice(2)}</em></div>`).join('')}</div></section>` : ''}
+  ${dec.length > 1 ? `<section class="card"><h2>${esc(tr('by_year'))}</h2><div class="cols">${dec.map(([d, n]) => `<div title="${d}s: ${n}"><em>${n}</em><i style="height:${Math.max(3, 82 * n / mxD)}px"></i><em>${String(d).slice(2)}</em></div>`).join('')}</div></section>` : ''}
   <div class="kpis"><section class="card" style="grid-column:1/-1"><h2>${esc(tr('quality'))}</h2><div class="bars">${q(withAuthor, tr('with_author'))}${q(withYear, tr('with_year'))}${q(withCat, tr('with_cat'))}${q(withFile, tr('with_file'))}</div><p class="small">${num(aDeath)} / ${num(A.length)} ${esc(tr('with_death'))} · ${num(multi)} ${esc(tr('multi'))}</p></section></div>
   ${byfmt.length || bylang.length ? `<section class="card"><h2>${esc(tr('by_fmt'))} · ${esc(tr('by_lang'))}</h2>${bars(byfmt, 6, 210)}${bylang.length ? '<br>' + bars(bylang, 6, 30) : ''}</section>` : ''}
   ${topA.length ? `<section class="card"><h2>${esc(tr('top_authors'))}</h2>${bars(topA, 8, 270)}</section>` : ''}
@@ -428,13 +501,32 @@ function renderStats() {
 }
 
 /* --------------------------------------------------------------------------------------------- sheet */
-let lastFocus = null;
+// One panel serves the book details, the filters and the settings. While it is open the page behind it is inert
+// (no focus, not read by a screen reader), and it has its own history entry so that the Back button closes it.
+let lastFocus = null, lastRow = '';
+const sheetOpen = () => !$('sheet').hidden;
+// A list row is rebuilt whenever the list is drawn again, so it is remembered by what it shows, not as an element.
+const rowKey = el => el && el.parentNode === inner ? ['w', 'au', 'cat'].map(k => el.dataset[k] === undefined ? '' : k + '=' + el.dataset[k]).join('') : '';
 function showSheet(html) {
-  lastFocus = document.activeElement;
-  $('panel-in').innerHTML = html; $('sheet').hidden = false; $('panel').scrollTop = 0; $('panel').focus();
+  if (!sheetOpen()) { lastFocus = document.activeElement; lastRow = rowKey(lastFocus); }
+  $('panel-in').innerHTML = html; $('sheet').hidden = false; $('app').inert = true;
+  const h = $('panel-in').querySelector('h2'); if (h) h.id = 'panel-t';
+  $('panel').scrollTop = 0; $('panel').focus();
   document.body.style.overflow = 'hidden';
 }
-function hideSheet() { $('sheet').hidden = true; document.body.style.overflow = ''; if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true }); }
+function hideSheet() {
+  if (!sheetOpen()) return;
+  $('sheet').hidden = true; $('app').inert = false; document.body.style.overflow = '';
+  const back = lastFocus && lastFocus.isConnected ? lastFocus : lastRow && [...inner.children].find(el => rowKey(el) === lastRow);
+  if (back) back.focus({ preventScroll: true });
+}
+function pushPanelEntry() { if (!inPanelEntry()) try { history.pushState({ panel: 1 }, '', location.href); } catch (_) {} }
+// Every way of closing a panel (its close button, the dimmed page, Escape) ends here.
+function closeSheet() {
+  if (!sheetOpen()) return;
+  if (inPanelEntry()) return history.back();          // the popstate handler hides it
+  S.open = ''; hideSheet(); writeHash(false, null);
+}
 function kv(pairs) { const rows = pairs.filter(p => p[1]); return rows.length ? `<dl class="kv">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd><bdi>${esc(v)}</bdi></dd>`).join('')}</dl>` : ''; }
 function filesHTML(b) {
   const fl = b.fl;
@@ -442,6 +534,8 @@ function filesHTML(b) {
   if (!Array.isArray(fl)) return `<a class="open" href="${esc(href(fl))}">${esc(tr('open'))} ${D.f[b.f] ? esc(D.f[b.f].toUpperCase()) : ''}${b.s ? ' · ' + bytes(b.s) : ''}</a>`;
   return `<ul class="vols">${fl.map(([lab, p, sz]) => p ? `<li><a href="${esc(href(p))}"><span>${esc(lab)}</span><small>${bytes(sz)}</small></a></li>` : `<li><span>${esc(lab)}<small>${bytes(sz)}</small></span></li>`).join('')}</ul>`;
 }
+// A page opened from an Android file manager has a content:// address, and a relative link cannot be followed from it.
+const linkHint = (protocol, w) => protocol === 'content:' && w.bs.some(b => [].concat(b.fl || []).some(f => { const p = Array.isArray(f) ? f[1] : f; return p && !ABS_URL.test(href(p)); }));
 function openWork(id, push = true) {
   const w = W[id]; if (!w) return;
   const b0 = w.rep, a = b0.a >= 0 ? A[b0.a] : null;
@@ -450,24 +544,25 @@ function openWork(id, push = true) {
   const multi = w.bs.length > 1, cats = new Set(w.bs.map(b => b.c));
   const catBtn = c => `<button type="button" style="all:unset;cursor:pointer;color:var(--accent);text-decoration:underline" data-pc="${esc(D.c[c])}" title="${esc(tr('pick_cat'))}">${esc(D.c[c].split('/').join(' › '))}</button>`;
   if (cats.size === 1 && b0.c >= 0) h += `<p class="small" style="margin:-4px 0 12px">${catBtn(b0.c)}</p>`;
+  if (linkHint(location.protocol, w)) h += `<p class="small hint">${esc(tr('content_hint'))}</p>`;
   w.bs.forEach((b, k) => {
     const d = b.d, label = [d.ed, d.e, d.p, b.y || ''].filter(Boolean).join(' · ');
     const single = !Array.isArray(b.fl);
     h += `<div class="${multi ? 'ed-card' : ''}">${multi ? `<h3>${esc(tr('edition'))} ${k + 1}${label ? ' · ' + esc(label) : ''}</h3>` : ''}${filesHTML(b)}${kv([
       [tr('editor'), d.e], [tr('publisher'), [d.p, d.pl].filter(Boolean).join(' – ')], [tr('edition'), multi ? '' : d.ed], [tr('pubyear'), multi && label.includes(String(b.y)) ? '' : b.y || ''], [tr('series'), d.s], [tr('isbn'), d.i],
       [tr('pages'), d.pg ? num(d.pg) : ''], [tr('format'), single ? '' : b.f >= 0 ? D.f[b.f].toUpperCase() : ''], [tr('language'), b.l >= 0 && !(multi && k) ? D.l[b.l].toUpperCase() : ''], [tr('size'), single ? '' : bytes(b.s)],
-      [tr('tags'), (d.t || []).join(' · ')], [tr('notes'), d.n], [tr('ids'), d.x ? Object.entries(d.x).map(([k2, v]) => k2 + ': ' + v).join(' · ') : ''],
+      [tr('aka'), (d.at || []).join(' · ')], [tr('tags'), (d.t || []).join(' · ')], [tr('notes'), d.n], [tr('ids'), d.x ? Object.entries(d.x).map(([k2, v]) => k2 + ': ' + v).join(' · ') : ''],
     ])}${cats.size > 1 && b.c >= 0 ? `<dl class="kv"><dt>${esc(tr('category'))}</dt><dd>${catBtn(b.c)}</dd></dl>` : ''}</div>`;
   });
   showSheet(h);
-  S.open = String(id); writeHash(push);
+  S.open = String(id); writeHash(push, push ? { panel: 1 } : undefined);
 }
-function closeWork() { if (S.open) { S.open = ''; hideSheet(); writeHash(false); } }
 
 function openFilters() {
   const opts = (items, cur) => `<option value="">${esc(tr('all'))}</option>` + items.map(([v, l]) => `<option value="${esc(v)}"${v === cur ? ' selected' : ''}>${esc(l)}</option>`).join('');
-  const cats = [...new Set(D.c.flatMap(c => { const p = c.split('/'); return p.map((_, i) => p.slice(0, i + 1).join('/')); }))].sort((a, b) => a.localeCompare(b, lang)).map(c => [c, ' '.repeat(c.split('/').length - 1) + c.split('/').pop()]);
+  const cats = [...new Set(D.c.flatMap(c => { const p = c.split('/'); return p.map((_, i) => p.slice(0, i + 1).join('/')); }))].sort(new Intl.Collator(lang).compare).map(c => [c, ' '.repeat(c.split('/').length - 1) + c.split('/').pop()]);
   const cents = [...new Map(A.filter(a => a.d).sort((x, y) => x.sort - y.sort).map(a => [a.ck, centLabel(a.c, a.cal)])).entries()];
+  pushPanelEntry();
   showSheet(`<h2>${esc(tr('filters'))}</h2>
    <label class="field"><span>${esc(tr('category'))}</span><select id="f-cat">${opts(cats, S.cat)}</select></label>
    ${D.l.length ? `<label class="field"><span>${esc(tr('language'))}</span><select id="f-lang">${opts(D.l.map(l => [l, l.toUpperCase()]), S.lang)}</select></label>` : ''}
@@ -476,11 +571,13 @@ function openFilters() {
    <label class="check"><input type="checkbox" id="f-multi"${S.multi ? ' checked' : ''}><span>${esc(tr('only_multi'))}</span></label>
    <div class="row2"><button class="ghost" type="button" id="f-reset">${esc(tr('reset'))}</button><button class="go" type="button" id="f-done">${esc(tr('done'))}</button></div>`);
   const apply = () => { S.cat = $('f-cat').value; S.lang = $('f-lang') ? $('f-lang').value : ''; S.fmt = $('f-fmt') ? $('f-fmt').value : ''; S.cent = $('f-cent') ? $('f-cent').value : ''; S.multi = $('f-multi').checked; };
-  $('f-done').onclick = () => { apply(); hideSheet(); writeHash(true); render(true); };
-  $('f-reset').onclick = () => { S.cat = S.lang = S.fmt = S.cent = ''; S.multi = false; S.author = -1; hideSheet(); writeHash(true); render(true); };
+  // the panel's history entry becomes the filtered list: Back then returns to the list as it was before
+  $('f-done').onclick = () => { apply(); hideSheet(); writeHash(inPanelEntry() ? false : true, null); render(true); };
+  $('f-reset').onclick = () => { S.cat = S.lang = S.fmt = S.cent = ''; S.multi = false; S.author = -1; hideSheet(); writeHash(inPanelEntry() ? false : true, null); render(true); };
 }
 function openSettings() {
   const seg = (key, items, cur) => `<div class="seg" data-seg="${key}">${items.map(([v, l]) => `<button type="button" data-val="${v}" aria-pressed="${v === cur}">${esc(l)}</button>`).join('')}</div>`;
+  pushPanelEntry();
   showSheet(`<h2>${esc(tr('settings'))}</h2>
    <div class="field"><span>${esc(tr('ui_language'))}</span>${seg('lang', Object.keys(T).map(k => [k, T[k].name]), lang)}</div>
    <div class="field"><span>${esc(tr('theme'))}</span>${seg('theme', [['auto', tr('auto')], ['light', tr('light')], ['dark', tr('dark')]], store.get('theme', 'auto'))}</div>
@@ -489,31 +586,42 @@ function openSettings() {
 }
 
 /* -------------------------------------------------------------------------------------------- chrome */
+const themeColor = () => { $('theme-color').content = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim(); };
+const searchDir = () => { $('q').dir = $('q').value ? 'auto' : T[lang].dir; };   // an Arabic query reads right to left in any interface
 function applyChrome() {
   const L = T[lang], root = document.documentElement;
   root.lang = lang; root.dir = L.dir;
   const th = store.get('theme', 'auto'); if (th === 'auto') root.removeAttribute('data-theme'); else root.dataset.theme = th;
   root.dataset.palette = store.get('palette', 'lapis');
+  themeColor();
   $('ttl').textContent = D.m.t; document.title = D.m.t;
-  $('q').placeholder = L.search; $('q').value = S.q;
+  $('q').placeholder = L.search; $('q').setAttribute('aria-label', L.search); $('q').value = S.q; searchDir();
   $('btn-set').innerHTML = ICON.gear; $('btn-set').setAttribute('aria-label', L.settings);
   $('x').innerHTML = ICON.x; $('x').setAttribute('aria-label', L.close);
   const labels = { browse: tr('browse'), cats: tr('categories'), authors: tr('authors'), stats: tr('stats') };
   const tabs = VIEWS.map(([v, ic]) => `<button type="button" data-v="${v}">${ICON[ic]}<span>${esc(labels[v])}</span></button>`).join('');
   $('nav').innerHTML = tabs; $('tabs').innerHTML = tabs;
+  $('nav').setAttribute('aria-label', L.views); $('tabs').setAttribute('aria-label', L.views);
   $('sort-l').textContent = L.sort;
-  $('sort').innerHTML = ['rel', 'title', 'author', 'year', 'size', 'added'].map(k => `<option value="${k}"${S.sort === k ? ' selected' : ''}>${esc(tr(k === 'rel' ? 'relevance' : k === 'title' ? 'title' : k))}</option>`).join('');
+  $('sort').innerHTML = SORTS.map(k => `<option value="${k}"${S.sort === k ? ' selected' : ''}>${esc(tr(k === 'rel' ? 'relevance' : k))}</option>`).join('');
 }
 
 /* ------------------------------------------------------------------------------------------- events */
-const reRender = () => { applyChrome(); render(false); };
-function go(view) { S.view = view; S.open = ''; $('sheet').hidden = true; document.body.style.overflow = ''; writeHash(true); render(true); }
+function go(view) { S.view = view; S.open = ''; hideSheet(); writeHash(true); render(true); }
+// Open or close a branch of the category tree; the row keeps the keyboard focus when it had it.
+function toggleCat(path, open, refocus) {
+  if (open === expanded.has(path)) return;
+  expanded.has(path) ? expanded.delete(path) : expanded.add(path);
+  const y = scrollY; render(false); scrollTo(0, y);
+  const el = refocus && [...inner.children].find(r => r.dataset.cat === path);
+  if (el) el.focus({ preventScroll: true });
+}
 document.addEventListener('click', e => {
   const t = e.target;
   const v = t.closest('[data-v]'); if (v) return go(v.dataset.v);
   const rm = t.closest('[data-rm]');
   if (rm) { const k = rm.dataset.rm; if (k === 'author') S.author = -1; else if (k === 'multi') S.multi = false; else S[k] = ''; writeHash(true); return render(true); }
-  if (t.closest('#clr')) { S.q = ''; S.cat = S.lang = S.fmt = S.cent = ''; S.author = -1; S.multi = false; $('q').value = ''; writeHash(true); return render(true); }
+  if (t.closest('#clr')) { S.q = ''; S.cat = S.lang = S.fmt = S.cent = ''; S.author = -1; S.multi = false; $('q').value = ''; searchDir(); writeHash(true); return render(true); }
   const rib = t.closest('[data-rib]'); if (rib) { const at = RIB[+rib.dataset.rib].at; window.scrollTo(0, host.getBoundingClientRect().top + scrollY + VL.offs[at] - 150); return; }
   const pa = t.closest('[data-pa]'); if (pa) { S.open = ''; hideSheet(); S.view = 'browse'; S.author = +pa.dataset.pa; S.q = ''; writeHash(true); return render(true); }
   const pc = t.closest('[data-pc]'); if (pc) { S.open = ''; hideSheet(); S.view = 'browse'; S.cat = pc.dataset.pc; S.q = ''; writeHash(true); return render(true); }
@@ -521,32 +629,56 @@ document.addEventListener('click', e => {
   if (seg) {
     const key = seg.parentNode.dataset.seg, val = seg.dataset.val;
     if (key === 'lang') { lang = val; store.set('lang', val); } else store.set(key, val);
-    applyChrome(); render(false); openSettings(); return;
+    applyChrome(); render(false); openSettings();
+    const again = document.querySelector(`[data-seg="${key}"] [data-val="${val}"]`); if (again) again.focus();
+    return;
   }
-  if (t.closest('#scrim') || t.closest('#x')) { if (S.open) { history.length > 1 && location.hash.includes('b=') ? history.back() : closeWork(); } else hideSheet(); return; }
+  if (t.closest('#scrim') || t.closest('#x')) return closeSheet();
   if (t.closest('#btn-set')) return openSettings();
   if (t.closest('#btn-filter')) return openFilters();
   const tg = t.closest('[data-tg]');
-  if (tg && S.view === 'cats') { const p = tg.dataset.tg; expanded.has(p) ? expanded.delete(p) : expanded.add(p); const y = scrollY; render(false); scrollTo(0, y); return; }
+  if (tg && tg.textContent && S.view === 'cats') return toggleCat(tg.dataset.tg);
   const wr = t.closest('[data-w]'); if (wr) return openWork(+wr.dataset.w);
   const au = t.closest('[data-au]'); if (au) { S.view = 'browse'; S.author = +au.dataset.au; S.q = ''; writeHash(true); return render(true); }
   const ct = t.closest('[data-cat]'); if (ct) { S.view = 'browse'; S.cat = ct.dataset.cat; S.q = ''; writeHash(true); return render(true); }
 });
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && !$('sheet').hidden) { S.open ? (history.back()) : hideSheet(); return; }
-  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('.row[role=button]')) { e.preventDefault(); e.target.click(); }
-  if (e.key === '/' && document.activeElement !== $('q') && $('sheet').hidden) { e.preventDefault(); $('q').focus(); }
+  const k = e.key, el = e.target, row = el.parentNode === inner ? el : null;
+  if (k === 'Escape' && sheetOpen()) return closeSheet();
+  if (e.altKey || e.ctrlKey || e.metaKey) return;
+  if ((k === 'Enter' || k === ' ') && row && row.matches('[role=button]')) { e.preventDefault(); return row.click(); }
+  if (row && (k === 'ArrowDown' || k === 'ArrowUp')) {       // the arrows walk the list; above the first row is the search box
+    const step = k === 'ArrowDown' ? 1 : -1;
+    e.preventDefault();
+    if (!focusRow(VL.first + [...inner.children].indexOf(row) + step, step) && step < 0) $('q').focus();
+    return;
+  }
+  if (row && row.hasAttribute('aria-expanded') && (k === 'ArrowRight' || k === 'ArrowLeft')) {   // towards the text end opens a branch
+    e.preventDefault();
+    return toggleCat(row.dataset.cat, (k === 'ArrowRight') === (document.documentElement.dir !== 'rtl'), true);
+  }
+  if (el === $('q') && (k === 'ArrowDown' || k === 'Enter') && !e.isComposing) {
+    // Enter on a phone only puts the keyboard away; with a real keyboard, Enter and the down arrow go to the results
+    if (k === 'Enter' && matchMedia('(pointer:coarse)').matches) return $('q').blur();
+    if (S.view !== 'stats' && VL.rows.length) { e.preventDefault(); clearTimeout(qt); if (S.q !== $('q').value) { S.q = $('q').value; writeHash(false); render(true); } focusRow(0, 1); }
+    return;
+  }
+  if (k === '/' && el !== $('q') && !sheetOpen()) { e.preventDefault(); $('q').focus(); }
 });
 let qt = 0;
-$('q').addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(() => { S.q = $('q').value; writeHash(false); render(true); }, 60); });
+$('q').addEventListener('input', () => { searchDir(); clearTimeout(qt); qt = setTimeout(() => { S.q = $('q').value; writeHash(false); render(true); }, 60); });
 $('sort').addEventListener('change', () => { S.sort = $('sort').value; writeHash(false); render(true); });
-addEventListener('popstate', () => { const wasOpen = S.open; readHash(); $('q').value = S.q; if (!S.open) { $('sheet').hidden = true; document.body.style.overflow = ''; } render(false); if (S.open) openWork(+S.open, false); });
-matchMedia('(prefers-color-scheme:dark)').addEventListener?.('change', () => {});
+addEventListener('popstate', () => { readHash(); $('q').value = S.q; searchDir(); render(false); if (S.open) openWork(+S.open, false); else hideSheet(); });
+matchMedia('(prefers-color-scheme:dark)').addEventListener?.('change', themeColor);
 
 applyChrome();
 $('boot').hidden = true; $('app').hidden = false;
 render(false);
-if (S.open && W[+S.open]) openWork(+S.open, false);
-setTimeout(buildIndex, 30);
-window.__pocketshelf = { readyMs: performance.now(), loadMs: tLoad, modelMs: tModel, books: B.length, works: W.length, search: q => { S.q = q; render(true); return RES.length; }, state: S };
+if (S.open) openWork(+S.open, false);
+setTimeout(indexInBackground, 30);
+window.__pocketshelf = {
+  readyMs: performance.now(), loadMs: tLoad, modelMs: tModel, books: B.length, works: W.length, state: S,
+  search: q => { S.q = q; render(true); return RES.length; },           // hooks for the tests and the benchmarks
+  indexed: () => ixWorks >= W.length, linkHint: (protocol, id) => linkHint(protocol, W[id]),
+};
 })();

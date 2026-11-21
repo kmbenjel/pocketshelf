@@ -4,17 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
+<meta name="theme-color" id="theme-color" content="#ecefe9">
+<meta name="format-detection" content="telephone=no">
 <title>__TITLE__</title>
 <style>/*__CSS__*/</style>
 </head>
 <body>
+<noscript><style>#boot{display:none}</style><p class="boot">This catalog needs JavaScript: open it in a web browser, not in a file preview.<br><span lang="ar" dir="rtl">يحتاج هذا الفهرس إلى JavaScript: افتحه في متصفح، لا في معاينة الملفات.</span><br><span lang="fr">Ce catalogue a besoin de JavaScript : ouvrez-le dans un navigateur, pas dans un aperçu de fichier.</span></p></noscript>
 <div id="boot" class="boot">…</div>
 <div id="app" hidden>
   <header id="top">
     <div class="top-in">
       <div class="brand">
         <h1 id="ttl"></h1>
-        <nav id="tabs" class="tabs" aria-label="Views"></nav>
+        <nav id="tabs" class="tabs"></nav>
         <button id="btn-set" class="icon" type="button"></button>
       </div>
       <div class="searchrow">
@@ -23,18 +26,18 @@
         <button id="btn-filter" class="btn" type="button"></button>
       </div>
       <div id="active" class="active"></div>
-      <div class="sumrow"><span id="sum"></span><label id="sortbox" class="sort"><span id="sort-l"></span><select id="sort"></select></label></div>
+      <div class="sumrow"><span id="sum" role="status"></span><label id="sortbox" class="sort"><span id="sort-l"></span><select id="sort"></select></label></div>
     </div>
   </header>
   <main id="main">
     <div id="vl"><div id="vl-in"></div></div>
     <div id="stats" class="stats" hidden></div>
   </main>
-  <nav id="nav" class="bottomnav" aria-label="Views"></nav>
+  <nav id="nav" class="bottomnav"></nav>
 </div>
 <div id="sheet" class="sheet" hidden>
   <div class="scrim" id="scrim"></div>
-  <section class="panel" id="panel" role="dialog" aria-modal="true" tabindex="-1">
+  <section class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-t" tabindex="-1">
     <button id="x" class="icon close" type="button"></button>
     <div id="panel-in"></div>
   </section>

@@ -76,7 +76,8 @@ main{max-width:920px;margin:auto;padding:6px var(--gut) calc(84px + env(safe-are
 .row.au{height:62px}
 .row.au .t{font-size:1rem}
 .row.cat{height:46px;display:flex;align-items:center;gap:8px;padding-block:0}
-.row.cat .car{width:22px;flex:none;text-align:center;color:var(--muted);transition:transform .15s}
+/* the arrow that opens a branch is a 36 px wide, full-height target; it takes the room of a 22 px one */
+.row.cat .car{width:36px;margin-inline:-8px -6px;align-self:stretch;display:grid;place-items:center;flex:none;color:var(--muted);transition:transform .15s}
 [dir=rtl] .row.cat .car{transform:scaleX(-1)}
 .row.cat .car.open{transform:rotate(90deg)}
 .row.cat .t{font:500 .98rem var(--sans);flex:1}

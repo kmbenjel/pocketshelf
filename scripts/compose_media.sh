@@ -17,7 +17,7 @@ phone "$RAW/phone-authors-dark.png" "$RAW/_ph3.png"
 desk "$RAW/desktop-editions.png" "$RAW/_dk.png" 880
 
 # hero: desktop (left) + three phones (English, Arabic, dark)
-convert -size 1900x860 gradient:'#dfe6dd'-'#c9d6e6' \
+convert -size 1900x790 gradient:'#dfe6dd'-'#c9d6e6' \
   "$RAW/_dk.png" -geometry +20+110 -composite \
   "$RAW/_ph1.png" -geometry +930+60 -composite \
   "$RAW/_ph2.png" -geometry +1250+120 -composite \

@@ -11,6 +11,7 @@ import pytest
 
 from pocketshelf.build import build_html
 from pocketshelf.model import Book, Volume
+from pocketshelf.synth import synthetic_books
 
 ROOT = Path(__file__).parents[1]
 CHROME = any(
@@ -75,12 +76,38 @@ def fixture_books():
             category="التاريخ/فلسفة",
             lang="ar",
         ),
+        Book(title="الزهد", author="عبد الله بن المبارك", author_death=181, author_calendar="ah", lang="ar"),
+        Book(
+            title="الجامع لأحكام القرآن",
+            alt_titles=["تفسير القرطبي"],
+            author="القرطبي",
+            author_death=671,
+            author_calendar="ah",
+            category="التفسير",
+            lang="ar",
+        ),
+        Book(title="Dune Messiah", author="Herbert, Frank", path="Dune: Messiah.epub", lang="en"),
         Book(
             title='<img src=x onerror="window.__injected=1"> img',
             author="<script>window.__injected=1</script>",
             category="Other",
         ),
     ]
+
+
+def run_e2e(page: Path, *flags: str) -> None:
+    direct = os.environ.get("CI") or not shutil.which("systemd-run")
+    env = {**os.environ, "PS_DIRECT_CHROME": "1"} if direct else os.environ
+    r = subprocess.run(
+        ["node", str(ROOT / "scripts/e2e.mjs"), str(page), *flags],
+        capture_output=True,
+        text=True,
+        timeout=300,
+        env=env,
+    )
+    last = r.stdout.strip().splitlines()[-1] if r.stdout.strip() else "{}"
+    res = json.loads(last)
+    assert res.get("ok"), res.get("failures") or r.stderr
 
 
 @pytest.mark.parametrize("compress", [True, False])
@@ -91,15 +118,11 @@ def test_page_in_chrome(tmp_path, compress):
     out.write_text(
         build_html(fixture_books(), "Fixture", "en", base="../lib/", compress=compress), encoding="utf-8"
     )
-    direct = os.environ.get("CI") or not shutil.which("systemd-run")
-    env = {**os.environ, "PS_DIRECT_CHROME": "1"} if direct else os.environ
-    r = subprocess.run(
-        ["node", str(ROOT / "scripts/e2e.mjs"), str(out)],
-        capture_output=True,
-        text=True,
-        timeout=180,
-        env=env,
-    )
-    last = r.stdout.strip().splitlines()[-1] if r.stdout.strip() else "{}"
-    res = json.loads(last)
-    assert res.get("ok"), res.get("failures") or r.stderr
+    run_e2e(out)
+
+
+def test_large_catalog_keyboard_and_phone_widths(tmp_path):
+    """3,000 synthetic books: the virtual list under the keyboard, and layouts down to a 320 px phone."""
+    out = tmp_path / "big.html"
+    out.write_text(build_html(synthetic_books(3000), "Big", "en"), encoding="utf-8")
+    run_e2e(out, "--big")

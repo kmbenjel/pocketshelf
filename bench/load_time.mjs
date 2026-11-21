@@ -2,10 +2,10 @@
 //   node bench/load_time.mjs FILE [cpuSlowdown=1] [runs=5]
 import { launch, open } from '../scripts/chrome.mjs';
 const [file, slow = '1', runs = '5'] = process.argv.slice(2);
-const c = await launch({ port: 9350 });
+const c = await launch();
 const med = a => [...a].sort((x, y) => x - y)[Math.floor(a.length / 2)];
 try {
-  const p = await open(9350, { width: 390, height: 800, mobile: true });
+  const p = await open(c.port, { width: 390, height: 800, mobile: true });
   await p.send('Emulation.setCPUThrottlingRate', { rate: +slow });
   const load = [], first = [], model = [], search = {};
   const queries = ['a', 'river', 'gar', 'الكتاب', 'jardin hiv', 'zzzz'];

@@ -1,8 +1,8 @@
 import { launch, open } from './chrome.mjs';
 const url = process.argv[2];
-const c = await launch({ port: 9344 });
+const c = await launch();
 try {
-  const p = await open(9344, { width: 1280, height: 900 });
+  const p = await open(c.port, { width: 1280, height: 900 });
   const logs = [];
   p.send('Log.enable').catch(() => {});
   await p.goto(url, 1500);

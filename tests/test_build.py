@@ -64,6 +64,12 @@ def test_payload_structure_and_grouping():
     assert p["f"] == ["pdf", "epub"] or set(p["f"]) == {"pdf", "epub"}
 
 
+def test_other_titles_travel_in_the_details():
+    p = make_payload([Book(title="الجامع لأحكام القرآن", alt_titles=["تفسير القرطبي"]), Book(title="Plain")])
+    by_title = {r[0]: r[9] for r in p["b"]}
+    assert by_title["الجامع لأحكام القرآن"] == {"at": ["تفسير القرطبي"]} and by_title["Plain"] == 0
+
+
 def test_sorted_by_folded_title():
     bs = [Book(title="Zebra"), Book(title="école"), Book(title="Apple")]
     assert [r[0] for r in make_payload(bs)["b"]] == ["Apple", "école", "Zebra"]

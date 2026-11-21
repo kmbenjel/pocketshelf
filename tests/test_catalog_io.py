@@ -26,6 +26,26 @@ def test_read_csv_turath_style_row(tmp_path):
     assert b.size == 1263747 and b.files[0].path == ""
 
 
+def test_alt_titles_are_read_written_and_overlaid(tmp_path):
+    f = tmp_path / "c.csv"
+    f.write_text(
+        "title,author,path,alt_titles\nالجامع لأحكام القرآن,القرطبي,t/q.pdf,تفسير القرطبي; الجامع\n",
+        encoding="utf-8",
+    )
+    (b,), _ = read_catalog(f)
+    assert b.alt_titles == ["تفسير القرطبي", "الجامع"]
+    g = tmp_path / "out.csv"
+    write_catalog([b], g)
+    (again,), _ = read_catalog(g)
+    assert again.alt_titles == b.alt_titles and again.title == b.title
+    j = tmp_path / "c.json"
+    j.write_text(json.dumps([{"title": "X", "aka": ["Y", "Z"]}]), encoding="utf-8")
+    (c,), _ = read_catalog(j)
+    assert c.alt_titles == ["Y", "Z"]
+    scanned = [Book(title="q", path="t/q.pdf")]
+    assert apply_sidecar(scanned, [b]) == 1 and scanned[0].alt_titles == ["تفسير القرطبي", "الجامع"]
+
+
 def test_read_json_forms(tmp_path):
     f = tmp_path / "c.json"
     f.write_text(

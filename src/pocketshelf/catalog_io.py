@@ -16,6 +16,7 @@ from .model import Book, Volume
 COLUMNS = [
     "title", "author", "author_death", "author_calendar", "category", "path", "volumes", "size", "pages", "lang",
     "work", "edition", "editor", "publisher", "place", "year", "series", "isbn", "tags", "note", "ext_ids", "added",
+    "alt_titles",
 ]  # fmt: skip
 INT_FIELDS = {"author_death", "size", "pages", "year", "mtime"}
 ALIASES = {  # tolerated spellings -> canonical column
@@ -24,6 +25,7 @@ ALIASES = {  # tolerated spellings -> canonical column
     "researcher": "editor", "editors": "editor", "date": "year", "published": "year", "bytes": "size", "filesize": "size",
     "work_id": "work", "workid": "work", "death": "author_death", "death_year": "author_death", "calendar": "author_calendar",
     "keywords": "tags", "subjects": "tags", "comment": "note", "notes": "note", "ids": "ext_ids", "isbn13": "isbn",
+    "alt_title": "alt_titles", "other_titles": "alt_titles", "aka": "alt_titles",
 }  # fmt: skip
 
 
@@ -82,8 +84,7 @@ def row_to_book(row: dict, mapping: dict[str, str] | None = None) -> Book:
     for k, v in row.items():
         if k is None:
             continue
-        key = mapping.get(k.strip(), mapping.get(k.strip().lower()))
-        key = key or ALIASES.get(k.strip().lower(), k.strip().lower())
+        key = _canonical(k, mapping)
         if key not in r or not r[key]:
             r[key] = v
     b = Book()
@@ -122,6 +123,7 @@ def row_to_book(row: dict, mapping: dict[str, str] | None = None) -> Book:
     if b.volumes and not b.size:
         b.size = sum(v.size for v in b.volumes)
     b.tags = _split(r.get("tags"))
+    b.alt_titles = _split(r.get("alt_titles"))
     ids = r.get("ext_ids")
     if isinstance(ids, dict):
         b.ext_ids = {str(k): str(v) for k, v in ids.items()}
@@ -140,20 +142,53 @@ def parse_mapping(spec: str | None) -> dict[str, str]:
     return m
 
 
+def _read_text(p: Path) -> str:
+    """UTF-8 (with or without a byte-order mark) or UTF-16 with one, which is what spreadsheets export."""
+    raw = p.read_bytes()
+    try:
+        if raw.startswith((b"\xff\xfe", b"\xfe\xff")):
+            return raw.decode("utf-16")
+        return raw.decode("utf-8-sig")
+    except UnicodeDecodeError as e:
+        raise ValueError(
+            f"{p} is not UTF-8 text (byte {e.start}); save it again as UTF-8 (in Excel: «CSV UTF-8»)"
+        ) from None
+
+
+def _canonical(column: str, mapping: dict[str, str]) -> str:
+    k = column.strip()
+    return mapping.get(k) or mapping.get(k.lower()) or ALIASES.get(k.lower(), k.lower())
+
+
 def read_catalog(path: str | Path, mapping: dict[str, str] | None = None) -> tuple[list[Book], dict]:
-    """Read a CSV or JSON catalog; returns ``(books, meta)`` where meta is the optional dataset-level block."""
+    """Read a CSV or JSON catalog; returns ``(books, meta)`` where meta is the optional dataset-level block.
+
+    Raises ``ValueError`` with a message meant for the user when the file cannot be understood.
+    """
     p = Path(path)
-    text = p.read_text(encoding="utf-8-sig")
+    text = _read_text(p)
     meta: dict = {}
     if p.suffix.lower() == ".json" or text.lstrip().startswith(("[", "{")):
-        data = json.loads(text)
+        try:
+            data = json.loads(text)
+        except ValueError as e:
+            raise ValueError(f"{p} is not valid JSON: {e}") from None
         if isinstance(data, dict):
             meta = data.get("meta", {}) or {}
             data = data.get("books", data.get("items", []))
+        if not isinstance(data, list) or not all(isinstance(r, dict) for r in data):
+            raise ValueError(f'{p}: expected a list of books, or {{"meta": ..., "books": [...]}}')
         rows = data
     else:
         dialect = csv.excel_tab if "\t" in text.split("\n", 1)[0] else csv.excel
-        rows = list(csv.DictReader(io.StringIO(text), dialect=dialect))
+        reader = csv.DictReader(io.StringIO(text), dialect=dialect)
+        columns = [c for c in reader.fieldnames or [] if c and c.strip()]
+        if columns and not {"title", "path"} & {_canonical(c, mapping or {}) for c in columns}:
+            raise ValueError(
+                f"{p} has no «title» or «path» column (found: {', '.join(columns)}); "
+                f"rename one, or map it: --map title={columns[0]}"
+            )
+        rows = list(reader)
     books = [row_to_book(r, mapping) for r in rows]
     books = [b for b in books if b.title or b.path]
     for b in books:
@@ -174,6 +209,7 @@ def write_catalog(books: list[Book], path: str | Path) -> None:
                 vols, b.size or "", b.pages or "", b.lang, b.work, b.edition, b.editor, b.publisher, b.place,
                 b.year or "", b.series, b.isbn, ";".join(b.tags), b.note, ";".join(f"{k}:{v}" for k, v in b.ext_ids.items()),
                 (date(1970, 1, 1) + timedelta(days=b.mtime)).isoformat() if b.mtime else "",
+                ";".join(b.alt_titles),
             ])  # fmt: skip
 
 
@@ -212,6 +248,8 @@ def apply_sidecar(books: list[Book], sidecar: list[Book], by_path: bool = True) 
             target.author_calendar = s.author_calendar
         if s.tags:
             target.tags = s.tags
+        if s.alt_titles:
+            target.alt_titles = s.alt_titles
         if s.ext_ids:
             target.ext_ids = {**target.ext_ids, **s.ext_ids}
     return n

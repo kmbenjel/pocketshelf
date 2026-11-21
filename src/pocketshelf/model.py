@@ -28,6 +28,7 @@ class Book:
     """
 
     title: str = ""
+    alt_titles: list[str] = field(default_factory=list)  # other titles the same book is known by; searchable
     author: str = ""
     author_death: int = 0  # 0 = unknown; negative = before the common era
     author_calendar: str = "ce"  # "ce" or "ah"

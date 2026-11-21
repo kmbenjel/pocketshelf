@@ -130,3 +130,55 @@ def test_progress_line_for_big_folders(tmp_path, capsys):
         f.write_bytes(pdf)
     assert main(["build", str(tmp_path / "lib"), "--no-cache"]) == 0
     assert "450 entries" in capsys.readouterr().err
+
+
+def data_of(page):
+    """The page's text: small test catalogs embed their data as plain JSON."""
+    return page.read_text(encoding="utf-8")
+
+
+def test_errors_say_what_to_do(tmp_path, pdf_factory, capsys):
+    """Each wrong input gets one line that names the file and the way out; nothing is written."""
+    books_dir = tmp_path / "lib"
+    pdf_factory(books_dir / "a.pdf")
+    cases = {
+        "latin1.csv": (b"title\nMis\xe9rables\n", "not UTF-8"),
+        "bad.json": (b"{bad", "not valid JSON"),
+        "shape.json": (b'{"books": "none"}', "expected a list of books"),
+        "cols.csv": (b"name_of_book,writer\nEmma,Austen\n", "--map title=name_of_book"),
+    }
+    for name, (raw, expect) in cases.items():
+        (tmp_path / name).write_bytes(raw)
+        assert main(["build", str(tmp_path / name)]) == 2
+        err = capsys.readouterr().err
+        assert expect in err and name in err and not (tmp_path / name).with_suffix(".html").exists()
+    assert main(["build", str(books_dir), "--no-cache", "--sidecar", str(tmp_path / "nope.csv")]) == 2
+    assert "sidecar" in capsys.readouterr().err
+    assert main(["scan", str(tmp_path / "nowhere")]) == 2 and "not a folder" in capsys.readouterr().err
+    (tmp_path / "empty").mkdir()
+    assert main(["scan", str(tmp_path / "empty"), "-o", str(tmp_path / "e.csv")]) == 1
+    assert not (tmp_path / "e.csv").exists()
+    assert main(["inspect", str(tmp_path / "nope.pdf")]) == 2 and "not a file" in capsys.readouterr().err
+
+
+def test_mapped_title_column_and_utf16_export(tmp_path, capsys):
+    f = tmp_path / "cols.csv"
+    f.write_text("name_of_book,writer\nEmma,Austen\n", encoding="utf-8")
+    assert main(["build", str(f), "--map", "title=name_of_book,author=writer"]) == 0
+    assert "Emma" in data_of(f.with_suffix(".html"))
+    g = tmp_path / "sheet.csv"  # a spreadsheet's «Unicode text» export: UTF-16 with a byte-order mark, tabs
+    g.write_bytes("title\tauthor\nإحياء علوم الدين\tالغزالي\n".encode("utf-16"))
+    assert main(["build", str(g)]) == 0
+    assert "الغزالي" in data_of(g.with_suffix(".html"))
+
+
+def test_output_may_be_a_folder(tmp_path, pdf_factory):
+    books_dir = tmp_path / "lib"
+    pdf_factory(books_dir / "a.pdf")
+    web = tmp_path / "web"
+    web.mkdir()
+    assert main(["build", str(books_dir), "--no-cache", "-o", str(web)]) == 0
+    assert '"base":"../lib/"' in data_of(web / "pocketshelf.html")
+    cat = tmp_path / "shelf.csv"
+    cat.write_text("title\nEmma\n", encoding="utf-8")
+    assert main(["build", str(cat), "-o", str(web)]) == 0 and (web / "shelf.html").exists()

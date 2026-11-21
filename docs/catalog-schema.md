@@ -5,12 +5,15 @@ columns on a scanned folder. One row is one book: a single file, or a multi-volu
 
 Only `title` is required. Unknown columns are ignored. Column names are matched case-insensitively and a few aliases are accepted
 (`file`/`filename`/`url` for `path`, `authors` for `author`, `section` for `category`, `language` for `lang`, `researcher`/`editors` for
-`editor`, `work_id` for `work`, `death` for `author_death`, `keywords` for `tags`, `bytes` for `size`, `ids` for `ext_ids`).
+`editor`, `work_id` for `work`, `death` for `author_death`, `keywords` for `tags`, `bytes` for `size`, `ids` for `ext_ids`,
+`aka`/`other_titles` for `alt_titles`). A CSV is read as UTF-8, or as UTF-16 when it starts with a byte-order mark (a spreadsheet's «Unicode text»).
+A file with neither a `title` nor a `path` column is refused with the list of the columns it has.
 Other names can be mapped on the command line: `--map author=author_name,work=work_id`.
 
 | Column | Type | Meaning |
 |--------|------|---------|
 | `title` | text | **Required.** |
+| `alt_titles` | text | Other titles the same book is known by, `;`-separated (a JSON list in JSON): `تفسير القرطبي` for «الجامع لأحكام القرآن». Searchable, listed in the book's panel. |
 | `author` | text | Display name. A trailing death-date is understood and removed: `Jefferson, Thomas, 1743-1826`, `ابن تيمية (ت 728 هـ)`. |
 | `author_death` | integer | Death year. Negative for BCE. Drives "authors by century". |
 | `author_calendar` | `ce` or `ah` | Calendar of `author_death` (default `ce`). Hijri centuries are shown as their own centuries, ordered by their Gregorian equivalent. |

@@ -68,6 +68,8 @@ def make_payload(books: list[Book], title: str = "Library", lang: str = "en", ba
         ):
             if v:
                 det[k] = v
+        if b.alt_titles:
+            det["at"] = b.alt_titles
         if b.tags:
             det["t"] = b.tags
         if b.ext_ids:

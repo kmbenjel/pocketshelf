@@ -38,6 +38,10 @@ def _log(*a: object, **kw: object) -> None:
     print(*a, file=sys.stderr, **kw)  # type: ignore[call-overload]
 
 
+def _entries(books: list) -> str:
+    return f"{len(books):,} {'entry' if len(books) == 1 else 'entries'}"
+
+
 def _add_scan_args(p: argparse.ArgumentParser) -> None:
     g = p.add_argument_group("how filenames and files are read")
     g.add_argument(
@@ -103,6 +107,12 @@ def _relative_base(root: Path, out: Path) -> str:
     return "" if rel == "." else rel + "/"
 
 
+def _out_file(output: str, default_name: str) -> Path:
+    """``-o`` may name a file, or an existing folder to put the file in under its default name."""
+    out = Path(output)
+    return out / default_name if out.is_dir() else out
+
+
 def cmd_build(a: argparse.Namespace) -> int:
     src = Path(a.source)
     if not src.exists():
@@ -118,7 +128,7 @@ def cmd_build(a: argparse.Namespace) -> int:
         )
         if len(books) > 400:
             _log()
-        out = Path(a.output) if a.output else src / "pocketshelf.html"
+        out = _out_file(a.output, "pocketshelf.html") if a.output else src / "pocketshelf.html"
         base = a.base if a.base is not None else _relative_base(src, out)
         title = a.title or src.resolve().name
         if not books:
@@ -126,13 +136,16 @@ def cmd_build(a: argparse.Namespace) -> int:
             return 1
     else:
         books, meta = read_catalog(src, parse_mapping(a.map))
-        out = Path(a.output) if a.output else src.with_suffix(".html")
+        out = _out_file(a.output, src.stem + ".html") if a.output else src.with_suffix(".html")
         base = a.base or ""
         title = a.title or meta.get("title") or src.stem
         if not books:
             _log(f"error: no rows read from {src}")
             return 1
     if a.sidecar:
+        if not Path(a.sidecar).is_file():
+            _log(f"error: the sidecar {a.sidecar} does not exist")
+            return 2
         side, _ = read_catalog(a.sidecar, parse_mapping(a.map))
         n = apply_sidecar(books, side)
         _log(f"  sidecar: {n} of {len(side)} rows matched a file by path")
@@ -149,22 +162,31 @@ def cmd_build(a: argparse.Namespace) -> int:
     )
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(page, encoding="utf-8")
-    _log(f"{len(books):,} entries -> {out} ({len(page.encode()) / 1e6:.2f} MB) in {time.time() - t0:.1f}s")
+    _log(f"{_entries(books)} -> {out} ({len(page.encode()) / 1e6:.2f} MB) in {time.time() - t0:.1f}s")
     if base:
         _log(f"  links are resolved from {out.resolve().parent} as '{base}<path>'")
     return 0
 
 
 def cmd_scan(a: argparse.Namespace) -> int:
+    if not Path(a.source).is_dir():
+        _log(f"error: {a.source} is not a folder (scan reads a folder of ebooks)")
+        return 2
     books = scan(a.source, _scan_opts(a))
+    if not books:
+        _log(f"error: no {a.ext} files found under {a.source}")
+        return 1
     out = a.output or "pocketshelf-catalog.csv"
     write_catalog(books, out)
-    _log(f"{len(books):,} entries -> {out} (edit it, then: pocketshelf build {a.source} --sidecar {out})")
+    _log(f"{_entries(books)} -> {out} (edit it, then: pocketshelf build {a.source} --sidecar {out})")
     return 0
 
 
 def cmd_inspect(a: argparse.Namespace) -> int:
     p = Path(a.file)
+    if not p.is_file():
+        _log(f"error: {p} is not a file")
+        return 2
     parser = FilenameParser(a.template, a.profile, a.order)
     res = {
         "file": str(p),
@@ -243,7 +265,7 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument(
         "-o",
         "--output",
-        help="output file (folder default: <folder>/pocketshelf.html; catalog default: next to it)",
+        help="output file, or a folder to put it in (default: <folder>/pocketshelf.html; for a catalog: next to it)",
     )
     b.add_argument("--title", help="page title (default: the folder name)")
     b.add_argument(

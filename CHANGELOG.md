@@ -15,5 +15,5 @@ First public version.
 - Keyboard and screen readers: arrows walk the list and the category tree, Enter and Escape open and close, the focus survives every redraw, the result count is announced, panels are modal dialogs, colours meet WCAG AA.
 - A bookmark made before a rebuild opens the catalog even when its filter no longer fits the data.
 - Clear messages for a catalog that cannot be read (not UTF-8, invalid JSON, no `title` column); UTF-16 spreadsheet exports are read; `-o` accepts a folder.
-- Gzip + base64 embedded data; 20,000 books are ready in about 0.3 s on a 4x-throttled CPU (bench/RESULTS.md).
+- Gzip + base64 embedded data; 20,000 books are ready in about 0.3 s on a 4x-throttled CPU and 100,000 in about 1.2 s; the search index is built after the first paint without holding the page (bench/RESULTS.md).
 - `scan`, `inspect`, `demo` and `bench` commands.

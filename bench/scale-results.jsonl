@@ -1,0 +1,19 @@
+{"books": 5000, "html_bytes": 280798, "html_gzip_bytes": 183301, "generate_s": 0.05, "build_s": 0.14, "file": "synth-5000.html"}
+{"books": 10000, "html_bytes": 481011, "html_gzip_bytes": 334688, "generate_s": 0.11, "build_s": 0.28, "file": "synth-10000.html"}
+{"books": 20000, "html_bytes": 871795, "html_gzip_bytes": 630647, "generate_s": 0.23, "build_s": 0.59, "file": "synth-20000.html"}
+{"books": 50000, "html_bytes": 2026155, "html_gzip_bytes": 1504712, "generate_s": 0.59, "build_s": 1.5, "file": "synth-50000.html"}
+{"books": 100000, "html_bytes": 3925520, "html_gzip_bytes": 2943135, "generate_s": 1.22, "build_s": 3.18, "file": "synth-100000.html"}
+{"build":"pg-all","seconds":4.65,"html_bytes":4016793}
+{"chrome":"Google Chrome 157.0.8103.78 ","cpus":16,"load_1min":3.77}
+{"file":"synth-5000.html","books":5000,"cpuSlowdown":1,"runs":7,"readyMs":38.7,"decodeMs":14.1,"modelMs":6.5,"blockedMs":0,"missMs":0.5,"wordMs":1.9,"arabicMs":1.8,"broadMs":2.5,"sortAuthorMs":2.5,"authorsMs":2.3,"catsMs":1.6,"statsMs":3.2,"heapMB":4.8}
+{"file":"synth-10000.html","books":10000,"cpuSlowdown":1,"runs":7,"readyMs":53.9,"decodeMs":22.6,"modelMs":9.6,"blockedMs":0,"missMs":0.7,"wordMs":3.6,"arabicMs":2.9,"broadMs":4,"sortAuthorMs":4,"authorsMs":3.1,"catsMs":1.8,"statsMs":5.1,"heapMB":8.1}
+{"file":"synth-20000.html","books":20000,"cpuSlowdown":1,"runs":7,"readyMs":84.8,"decodeMs":37.5,"modelMs":16.3,"blockedMs":0,"missMs":1.9,"wordMs":4.3,"arabicMs":3.7,"broadMs":9.9,"sortAuthorMs":8.1,"authorsMs":3.8,"catsMs":1.9,"statsMs":6.4,"heapMB":14.9}
+{"file":"synth-50000.html","books":50000,"cpuSlowdown":1,"runs":7,"readyMs":168.7,"decodeMs":82.8,"modelMs":41.4,"blockedMs":0,"missMs":2.5,"wordMs":7.9,"arabicMs":6.5,"broadMs":17.1,"sortAuthorMs":15.3,"authorsMs":4.8,"catsMs":2.9,"statsMs":11.1,"heapMB":35}
+{"file":"synth-100000.html","books":100000,"cpuSlowdown":1,"runs":7,"readyMs":302.5,"decodeMs":187.2,"modelMs":60.1,"blockedMs":0,"missMs":3.3,"wordMs":12,"arabicMs":10.6,"broadMs":24.4,"sortAuthorMs":32.1,"authorsMs":7.1,"catsMs":5.3,"statsMs":26.1,"heapMB":69}
+{"file":"pg-all.html","books":78518,"cpuSlowdown":1,"runs":7,"readyMs":285.4,"decodeMs":174.1,"modelMs":54.1,"blockedMs":0,"missMs":4.3,"wordMs":10,"arabicMs":3.6,"broadMs":37.3,"sortAuthorMs":53.6,"authorsMs":30.2,"catsMs":4.3,"statsMs":22.9,"heapMB":63.9}
+{"file":"synth-5000.html","books":5000,"cpuSlowdown":4,"runs":7,"readyMs":142.2,"decodeMs":50.7,"modelMs":24,"blockedMs":0,"missMs":1.9,"wordMs":7.5,"arabicMs":6.1,"broadMs":9.4,"sortAuthorMs":9.9,"authorsMs":9.3,"catsMs":5.9,"statsMs":14.1,"heapMB":4.9}
+{"file":"synth-10000.html","books":10000,"cpuSlowdown":4,"runs":7,"readyMs":200.3,"decodeMs":81,"modelMs":34,"blockedMs":0,"missMs":4.7,"wordMs":10.9,"arabicMs":8.9,"broadMs":17.2,"sortAuthorMs":17.2,"authorsMs":11.9,"catsMs":6.6,"statsMs":18.4,"heapMB":8.4}
+{"file":"synth-20000.html","books":20000,"cpuSlowdown":4,"runs":7,"readyMs":316.7,"decodeMs":143.5,"modelMs":56.6,"blockedMs":0,"missMs":6.5,"wordMs":17.1,"arabicMs":13.1,"broadMs":30.7,"sortAuthorMs":29.2,"authorsMs":13.9,"catsMs":8.5,"statsMs":24.8,"heapMB":14.9}
+{"file":"synth-50000.html","books":50000,"cpuSlowdown":4,"runs":7,"readyMs":628.7,"decodeMs":324.1,"modelMs":145.9,"blockedMs":0,"missMs":12.4,"wordMs":33.4,"arabicMs":25.8,"broadMs":47.7,"sortAuthorMs":62.6,"authorsMs":19.9,"catsMs":12.7,"statsMs":44.3,"heapMB":35}
+{"file":"synth-100000.html","books":100000,"cpuSlowdown":4,"runs":7,"readyMs":1154.5,"decodeMs":744.7,"modelMs":192.3,"blockedMs":0,"missMs":13.9,"wordMs":49,"arabicMs":47.5,"broadMs":81.5,"sortAuthorMs":130.3,"authorsMs":31.2,"catsMs":17.2,"statsMs":82.1,"heapMB":69}
+{"file":"pg-all.html","books":78518,"cpuSlowdown":4,"runs":7,"readyMs":1093.5,"decodeMs":687.5,"modelMs":180.6,"blockedMs":52,"missMs":23.4,"wordMs":47.2,"arabicMs":20.7,"broadMs":168.1,"sortAuthorMs":218.8,"authorsMs":139.8,"catsMs":19.1,"statsMs":83.7,"heapMB":63.2}

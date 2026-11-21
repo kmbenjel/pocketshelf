@@ -57,10 +57,11 @@ Checked against each project's documentation on 2026-11-13 and, where marked **m
 
 ### What is different, with evidence
 
-1. **Nothing to run.** The output is one HTML file. `pocketshelf demo` produces a working catalog of 3,018 books in half a second and 0.22 MB; open it with
+1. **Nothing to run.** The output is one HTML file. `pocketshelf demo` produces a working catalog of 3,018 books in 0.2 s and 0.23 MB; open it with
    no network and no process.
-2. **It stays quick at 20,000 books.** Measured on a [public Project Gutenberg title list](bench/pg_catalog_to_csv.py) and on synthetic data (see
-   [Benchmarks](#benchmarks)): about 1 MB of HTML, ready in 299 ms on a CPU throttled 4x to resemble a phone, searches in tens of milliseconds, and only the rows on screen exist in the DOM.
+2. **It stays quick at 20,000 books, and usable at 100,000.** Measured on a [public Project Gutenberg title list](bench/pg_catalog_to_csv.py) and on synthetic data (see
+   [Benchmarks](#benchmarks)): at 20,000 books about 1 MB of HTML, ready in 283 ms on a CPU throttled 4x to resemble a phone, searches in tens of milliseconds;
+   at 100,000 books 3.9 MB, ready in 1.2 s. Only the rows on screen exist in the DOM, and the page is never held for longer than about 50 ms after its first paint.
 3. **Search that knows Arabic.** `احياء علوم` finds «إحياء علوم الدين»; `miserables` finds *Les Misérables*; `عبدالله` finds a name written «عبد الله» and `ابن` one
    written «بن»; harakat, tatweel, alef/hamza forms, ta marbuta, ya and invisible direction marks are folded on both sides, with the same rules in Python and in
    the page (a test runs the two against each other on about 9,600 strings).
@@ -155,24 +156,42 @@ Design decisions:
 
 ## Benchmarks
 
-Headless Chrome 157 on a 32-vCPU cloud VM; "4x" means `Emulation.setCPUThrottlingRate(4)`, which resembles a mid-range phone but is not a real phone (on an older laptop CPU the 4x run takes 0.7-0.8 s).
+Headless Chrome 157 on a cloud VM (AMD EPYC 7B13); "4x" means `Emulation.setCPUThrottlingRate(4)`, which resembles a mid-range phone but is not a real phone (on an older laptop CPU the 4x run takes 0.7-0.8 s).
 Real titles are the first 20,000 texts of the Project Gutenberg catalog; synthetic is `pocketshelf bench -n 20000`.
-Reproduce: `make bench`, or `bench/load_time.mjs` (see [`bench/RESULTS.md`](bench/RESULTS.md) for the run and the machine).
+Reproduce: `make bench`, or `bench/browser_bench.sh` (see [`bench/RESULTS.md`](bench/RESULTS.md) for the run and the machine).
 
 | 20,000 books | HTML file | Build | Ready at 1x | Ready at 4x | Search "river" at 4x |
 |---|---|---|---|---|---|
-| Real titles (Project Gutenberg) | 1.01 MB | 1.8 s | 77 ms | 299 ms | 21 ms |
-| Synthetic (`pocketshelf bench`) | 0.86 MB | 1.1 s | 76 ms | 288 ms | 28 ms |
+| Real titles (Project Gutenberg) | 1.02 MB | 1.2 s | 75 ms | 283 ms | 14 ms |
+| Synthetic (`pocketshelf bench`) | 0.87 MB | 0.6 s | 68 ms | 270 ms | 22 ms |
 
-The first query after start-up also builds the search index when it comes before the background timer (88 ms at 1x, 356 ms at 4x for a 17,000-hit query); every later query takes 1-30 ms.
-Building from a folder of 20,000 one-page PDFs takes 5.0 s.
+The search index is built in the background after the first paint, in slices of 8 ms; a query that comes before it is complete finishes it first
+(53 ms at 1x, 196 ms at 4x for a 17,000-hit query typed the moment the page opens); every later query takes 1-22 ms.
+Building from a folder of 20,000 one-page PDFs takes 4.5 s.
 
-Head to head on the same 20,000 synthetic books, same VM:
+### From 5,000 to 100,000 books
+
+<p align="center"><img src="docs/media/scale.svg" alt="Line chart: time until the list is on screen grows in a straight line with the catalog, from 39 ms at 5,000 books to 0.3 s at 100,000 on a desktop CPU, and from 142 ms to 1.2 s on a CPU slowed four times" width="760"></p>
+
+| Books | HTML file | Ready, 1x | Ready, 4x | Longest block after the first paint, 4x | Search "river", 4x | Sort by author, 4x | JS heap |
+|---|---|---|---|---|---|---|---|
+| 5,000 synthetic | 0.28 MB | 39 ms | 142 ms | under 50 ms | 8 ms | 10 ms | 5 MB |
+| 10,000 synthetic | 0.48 MB | 54 ms | 200 ms | under 50 ms | 11 ms | 17 ms | 8 MB |
+| 20,000 synthetic | 0.87 MB | 85 ms | 317 ms | under 50 ms | 17 ms | 29 ms | 15 MB |
+| 50,000 synthetic | 2.03 MB | 169 ms | 629 ms | under 50 ms | 33 ms | 63 ms | 35 MB |
+| 78,518 real titles (Project Gutenberg) | 4.02 MB | 285 ms | 1094 ms | 52 ms | 47 ms | 219 ms | 63 MB |
+| 100,000 synthetic | 3.93 MB | 302 ms | 1154 ms | under 50 ms | 49 ms | 130 ms | 69 MB |
+
+Start-up grows in a straight line with the catalog (about 11 ms per thousand books at 4x), most of it unpacking the data; everything after it stays
+interactive. Median of 7 runs, the six files visited in turn (which is why 20,000 books read a little slower here than above); the lines are in
+[`bench/scale-results.jsonl`](bench/scale-results.jsonl), the script is [`bench/scale.sh`](bench/scale.sh) (`make scale`).
+
+Head to head on the same 20,000 synthetic books, on the same type of VM (Calibre and Komga on 2026-11-13, pocketshelf again on 2026-11-21):
 
 | | Calibre 9.18.0 | Komga 1.30.1 | pocketshelf |
 |---|---|---|---|
 | Download / installed | 229 MB / 910 MB | 121 MB jar + Java | 179 KB wheel |
-| Make 20,000 books searchable | 581 s (records via the Python API) | 44.8 s (scan of 20,000 PDFs) | 1.6 s (CSV), 5.0 s (folder of PDFs) |
+| Make 20,000 books searchable | 581 s (records via the Python API) | 44.8 s (scan of 20,000 PDFs) | 1.2 s (CSV), 4.5 s (folder of PDFs) |
 | Running cost while you browse | server: 191 MB resident | server: 1,036 MB resident | none: a browser tab and one file |
 | Static catalog export | CSV, 2.4 s, no search UI | none | the page itself |
 

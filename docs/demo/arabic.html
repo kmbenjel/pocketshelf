@@ -85,7 +85,8 @@ main{max-width:920px;margin:auto;padding:6px var(--gut) calc(84px + env(safe-are
 .row.au{height:62px}
 .row.au .t{font-size:1rem}
 .row.cat{height:46px;display:flex;align-items:center;gap:8px;padding-block:0}
-.row.cat .car{width:22px;flex:none;text-align:center;color:var(--muted);transition:transform .15s}
+/* the arrow that opens a branch is a 36 px wide, full-height target; it takes the room of a 22 px one */
+.row.cat .car{width:36px;margin-inline:-8px -6px;align-self:stretch;display:grid;place-items:center;flex:none;color:var(--muted);transition:transform .15s}
 [dir=rtl] .row.cat .car{transform:scaleX(-1)}
 .row.cat .car.open{transform:rotate(90deg)}
 .row.cat .t{font:500 .98rem var(--sans);flex:1}
@@ -631,6 +632,8 @@ addEventListener('resize', onScroll);
 /* --------------------------------------------------------------------------------------------------- rows */
 let TOK = [];
 const hl = s => highlight(s, TOK, esc);
+// A title in another language than the interface says so, and a screen reader reads it with the right voice.
+const langAttr = b => b.l >= 0 && D.l[b.l] !== lang ? ` lang="${esc(D.l[b.l])}"` : '';
 function rowHTML(r) {
   if (r.k === 'w') {
     const w = r.w, b = w.rep, a = b.a >= 0 ? A[b.a] : null, files = w.bs.reduce((n, x) => n + (Array.isArray(x.fl) ? x.fl.length : x.fl ? 1 : 0), 0);
@@ -643,7 +646,7 @@ function rowHTML(r) {
     if (w.size) tags.push(`<span>${bytes(w.size)}</span>`);
     if (w.year) tags.push(`<span>${w.year}</span>`);
     const sub = [a ? hl(a.n) : '', a && a.d ? esc(lifeLabel(a)) : ''].filter(Boolean).join(' · ');
-    return `<article class="row" role="button" tabindex="0" data-w="${w.id}" style="--h:${w.hue}"><span class="t"><bdi>${hl(b.t)}</bdi></span><span class="a"><bdi>${sub}${!a && ed ? esc(ed) : ''}</bdi></span><div class="m">${tags.join('')}</div></article>`;
+    return `<article class="row" role="button" tabindex="0" data-w="${w.id}" style="--h:${w.hue}"><span class="t"${langAttr(b)}><bdi>${hl(b.t)}</bdi></span><span class="a"><bdi>${sub}${!a && ed ? esc(ed) : ''}</bdi></span><div class="m">${tags.join('')}</div></article>`;
   }
   if (r.k === 'hd') return `<div class="row hd"><span>${esc(r.label)}</span><small>${esc(tr('n_authors', { n: num(r.n) }))}</small></div>`;
   if (r.k === 'au') {
@@ -728,7 +731,7 @@ function render(reset) {
     const total = W.length;
     $('sum').textContent = RES.length === total ? tr('n_works', { n: num(total) }) : tr('n_works_of', { n: num(RES.length), m: num(total) });
     if (!RES.length) { inner.innerHTML = emptyHTML(); inner.style.height = 'auto'; inner.style.paddingTop = '0'; VL.rows = []; VL.total = 0; }
-    else setRows(RES.map(w => ({ k: 'w', w })), () => ROWH());
+    else { const h = ROWH(); setRows(RES.map(w => ({ k: 'w', w })), () => h); }   // one style lookup, not one per row
   } else if (v === 'cats') {
     const rows = catRows();
     $('sum').textContent = tr('n_cats', { n: num(D.c.length) });
@@ -848,7 +851,7 @@ const linkHint = (protocol, w) => protocol === 'content:' && w.bs.some(b => [].c
 function openWork(id, push = true) {
   const w = W[id]; if (!w) return;
   const b0 = w.rep, a = b0.a >= 0 ? A[b0.a] : null;
-  let h = `<h2><bdi>${esc(b0.t)}</bdi></h2>`;
+  let h = `<h2${langAttr(b0)}><bdi>${esc(b0.t)}</bdi></h2>`;
   if (a) h += `<p class="by"><button type="button" data-pa="${a.i}" title="${esc(tr('pick_author'))}"><bdi>${esc(a.n)}</bdi></button>${a.d ? ' · ' + esc(lifeLabel(a)) : ''}</p>`;
   const multi = w.bs.length > 1, cats = new Set(w.bs.map(b => b.c));
   const catBtn = c => `<button type="button" style="all:unset;cursor:pointer;color:var(--accent);text-decoration:underline" data-pc="${esc(D.c[c])}" title="${esc(tr('pick_cat'))}">${esc(D.c[c].split('/').join(' › '))}</button>`;

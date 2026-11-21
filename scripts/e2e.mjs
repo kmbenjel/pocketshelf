@@ -102,6 +102,9 @@ async function small() {
   yes('closing a linked book stays in the catalog', await p.eval(`!!window.__pocketshelf && location.protocol === 'file:'`));
   await ready('#b=' + emma); await click('#x'); await p.waitFor(`document.getElementById('sheet').hidden`, 'the close button');
   yes('the close button stays in the catalog', await p.eval(`!!window.__pocketshelf && location.protocol === 'file:'`));
+  await ready('#b=' + emma); await p.eval('history.back()');
+  await p.waitFor(`document.getElementById('sheet')?.hidden`, 'Back to close the linked book');
+  yes('Back on a linked book stays in the catalog', await p.eval(`!!window.__pocketshelf && location.protocol === 'file:' && !location.hash.includes('b=')`));
 
   // other titles, file names with a colon, and the note for pages opened from an Android file manager
   await search('القرطبي'); await click('.row[data-w]'); await p.waitFor(`!document.getElementById('sheet').hidden`, 'the book panel');

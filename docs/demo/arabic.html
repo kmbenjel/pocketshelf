@@ -986,7 +986,10 @@ matchMedia('(prefers-color-scheme:dark)').addEventListener?.('change', themeColo
 applyChrome();
 $('boot').hidden = true; $('app').hidden = false;
 render(false);
-if (S.open) openWork(+S.open, false);
+// A link straight to a book (a bookmark, a shared address): the list is put under it in the history, so that Back
+// closes the book instead of leaving the catalog. A reload keeps the entries it already has.
+if (S.open && !inPanelEntry()) { const id = +S.open; S.open = ''; writeHash(false, null); openWork(id); }
+else if (S.open) openWork(+S.open, false);
 setTimeout(indexInBackground, 30);
 window.__pocketshelf = {
   readyMs: performance.now(), loadMs: tLoad, modelMs: tModel, books: B.length, works: W.length, state: S,

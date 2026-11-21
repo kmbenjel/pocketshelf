@@ -10,6 +10,7 @@ Instant search that ignores accents and Arabic spelling variants, categories, au
 [![Python](https://img.shields.io/pypi/pyversions/pocketshelf.svg)](https://pypi.org/project/pocketshelf/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Dependencies: none](https://img.shields.io/badge/dependencies-none-brightgreen.svg)](pyproject.toml)
+[![Arabic docs](https://img.shields.io/badge/docs-%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9-0a7)](https://warraq.benjelloun.dev/pocketshelf/)
 
 <img src="docs/media/hero.webp" alt="pocketshelf catalog on a desktop and three phones: search with highlights, editions of one work, authors by century in dark mode, and an Arabic right-to-left view" width="900">
 

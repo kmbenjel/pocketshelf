@@ -139,11 +139,14 @@ def synthetic_books(n: int, seed: int = 7) -> list[Book]:
         lang = rnd.choices(["en", "fr", "ar"], [6, 2, 2])[0]
         words = {"en": _EN, "fr": _FR, "ar": _AR}[lang]
         title = " ".join(rnd.choice(words) for _ in range(rnd.randint(2, 6))).capitalize()
-        name, death, cal = (
-            rnd.choice([a for a in authors[:: rnd.randint(1, 3)]] or authors)
-            if lang != "ar"
-            else rnd.choice(authors[-max(20, n // 20) :])
-        )
+        if (
+            lang != "ar"
+        ):  # every author, every second or every third one: the same draw as a choice from that slice
+            step = rnd.randint(1, 3)
+            name, death, cal = authors[step * rnd.randrange(len(range(0, len(authors), step)))]
+        else:
+            first_ar = len(authors) - max(20, n // 20)
+            name, death, cal = authors[first_ar + rnd.randrange(len(authors) - first_ar)]
         cat = rnd.choice(_CATS)
         ext = rnd.choice(["pdf", "pdf", "pdf", "epub", "djvu"])
         folder = f"{cat}/{title[:40]}"

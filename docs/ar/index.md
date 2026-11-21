@@ -26,7 +26,7 @@ order: 1
 ## ثلاثة أوامر
 
 ```bash
-pip install pocketshelf
+pipx install pocketshelf
 pocketshelf demo --arabic --open
 pocketshelf build ~/Books --lang ar
 ```

@@ -4,30 +4,34 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
+<meta name="theme-color" id="theme-color" content="#ecefe9">
+<meta name="format-detection" content="telephone=no">
 <title>مكتبة العربية الكلاسيكية</title>
 <style>:root{
-  --bg:#ecefe9;--surface:#f7f8f4;--ink:#16201e;--muted:#5a6965;--line:#d3d9d0;--accent:#1d4e9e;--accent-ink:#fff;--rubric:#b3261e;--mark:#f6dcc9;--gold:#9a7418;
+  --bg:#ecefe9;--surface:#f7f8f4;--ink:#16201e;--muted:#5a6965;--line:#d3d9d0;--edge:#7d8984;--accent:#1d4e9e;--accent-ink:#fff;--rubric:#b3261e;--mark:#f6dcc9;--gold:#9a7418;
   --sat:38%;--lum:44%;--shadow:0 1px 0 #0000000a,0 8px 24px -12px #14221f40;
   --serif:"Source Serif 4","Iowan Old Style","Palatino Linotype",Palatino,"Noto Serif","Noto Naskh Arabic","Amiri","Traditional Arabic",Georgia,serif;
   --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Sans Arabic","Helvetica Neue",Arial,sans-serif;
   --row:88px;--gut:16px;
 }
-:root[data-palette=paper]{--bg:#f7f4ee;--surface:#fffdf8;--ink:#1f1b16;--muted:#6b6358;--line:#e4ddd0;--accent:#7a4b1e;--mark:#f5e2b8}
+:root[data-palette=paper]{--bg:#f7f4ee;--surface:#fffdf8;--ink:#1f1b16;--muted:#6b6358;--line:#e4ddd0;--edge:#968c7d;--accent:#7a4b1e;--mark:#f5e2b8}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]){
-  --bg:#0e1413;--surface:#151d1b;--ink:#e3e9e5;--muted:#98a7a2;--line:#263330;--accent:#8cb1f2;--accent-ink:#0e1413;--rubric:#f28b7d;--mark:#4a2c27;--gold:#d9b25a;--lum:62%;--shadow:0 1px 0 #ffffff08,0 8px 24px -12px #000a}
-  :root[data-palette=paper]:not([data-theme=light]){--bg:#16140f;--surface:#1f1c16;--ink:#ece6da;--muted:#a59c8d;--line:#332e25;--accent:#e0a86a;--mark:#4a3d1a}}
+  --bg:#0e1413;--surface:#151d1b;--ink:#e3e9e5;--muted:#98a7a2;--line:#263330;--edge:#63736e;--accent:#8cb1f2;--accent-ink:#0e1413;--rubric:#f28b7d;--mark:#4a2c27;--gold:#d9b25a;--lum:62%;--shadow:0 1px 0 #ffffff08,0 8px 24px -12px #000a}
+  :root[data-palette=paper]:not([data-theme=light]){--bg:#16140f;--surface:#1f1c16;--ink:#ece6da;--muted:#a59c8d;--line:#332e25;--edge:#766d5f;--accent:#e0a86a;--mark:#4a3d1a}}
 :root[data-theme=dark]{
-  --bg:#0e1413;--surface:#151d1b;--ink:#e3e9e5;--muted:#98a7a2;--line:#263330;--accent:#8cb1f2;--accent-ink:#0e1413;--rubric:#f28b7d;--mark:#4a2c27;--gold:#d9b25a;--lum:62%;--shadow:0 1px 0 #ffffff08,0 8px 24px -12px #000a}
-:root[data-theme=dark][data-palette=paper]{--bg:#16140f;--surface:#1f1c16;--ink:#ece6da;--muted:#a59c8d;--line:#332e25;--accent:#e0a86a;--mark:#4a3d1a}
+  --bg:#0e1413;--surface:#151d1b;--ink:#e3e9e5;--muted:#98a7a2;--line:#263330;--edge:#63736e;--accent:#8cb1f2;--accent-ink:#0e1413;--rubric:#f28b7d;--mark:#4a2c27;--gold:#d9b25a;--lum:62%;--shadow:0 1px 0 #ffffff08,0 8px 24px -12px #000a}
+:root[data-theme=dark][data-palette=paper]{--bg:#16140f;--surface:#1f1c16;--ink:#ece6da;--muted:#a59c8d;--line:#332e25;--edge:#766d5f;--accent:#e0a86a;--mark:#4a3d1a}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
-html{scroll-padding-top:150px}
+html{scroll-padding:150px 0 calc(90px + env(safe-area-inset-bottom))}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--sans);-webkit-text-size-adjust:100%}
 button,input,select{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
 .boot{padding:40vh 0 0;text-align:center;color:var(--muted);font-size:1.4rem}
-mark{background:var(--mark);color:inherit;border-radius:3px;box-shadow:0 -1px 0 var(--rubric) inset;padding:0 1px}
+noscript .boot{padding:30vh var(--gut) 0;font-size:1.05rem;line-height:1.9}
+/* no padding on a mark: padding inside a word would break the joining of Arabic letters */
+mark{background:var(--mark);color:var(--ink);border-radius:3px;box-shadow:0 -1px 0 var(--rubric) inset}
 bdi{unicode-bidi:isolate}
 
 /* header ------------------------------------------------------------------------------------------------------- */
@@ -39,22 +43,22 @@ h1{font:700 1.3rem/1.2 var(--serif);margin:0;flex:1;min-width:0;overflow:hidden;
 .icon:hover{background:var(--line)}
 .icon svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .searchrow{display:flex;gap:8px}
-.search{flex:1;display:flex;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:0 12px;min-width:0;transition:border-color .15s}
+.search{flex:1;display:flex;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--edge);border-radius:14px;padding:0 12px;min-width:0;transition:border-color .15s}
 .search:focus-within{border-color:var(--accent)}
 .search svg{width:20px;height:20px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;flex:none}
-#q{flex:1;border:0;background:transparent;height:46px;font-size:1.05rem;min-width:0;outline:0}
+#q{flex:1;border:0;background:transparent;height:46px;font-size:1.05rem;min-width:0;outline:0;text-align:start}
+#q::placeholder{color:var(--muted);opacity:1}
 #q::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;height:18px;width:18px;border-radius:50%;background:var(--muted) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke='%23fff' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M8 8l8 8M16 8l-8 8'/%3E%3C/svg%3E") center/70% no-repeat}
-.btn{border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:0 14px;height:49px;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.btn{border:1.5px solid var(--edge);background:var(--surface);border-radius:14px;padding:0 14px;height:49px;white-space:nowrap;display:flex;align-items:center;gap:6px}
 .btn b{background:var(--accent);color:var(--accent-ink);border-radius:999px;min-width:20px;height:20px;font-size:.75rem;display:grid;place-items:center;padding:0 5px}
 .active{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .active:empty{display:none}
-.pill{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 6px 3px 12px;font-size:.85rem;max-width:100%}
-[dir=rtl] .pill{padding:3px 12px 3px 6px}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px;padding-inline-start:12px;font-size:.85rem;max-width:100%}
 .pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60vw}
-.pill button{border:0;background:var(--line);border-radius:50%;width:20px;height:20px;line-height:1;display:grid;place-items:center;font-size:.8rem}
+.pill button{border:0;background:var(--line);border-radius:50%;width:28px;height:28px;line-height:1;display:grid;place-items:center;font-size:.95rem;padding:0;flex:none}
 .sumrow{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;color:var(--muted);font-size:.85rem;min-height:26px}
 .sort{display:flex;align-items:center;gap:6px}
-.sort select{border:0;background:transparent;color:var(--ink);font-size:.85rem;font-weight:600;padding:2px 0;max-width:42vw}
+.sort select{border:0;background:transparent;color:var(--ink);font-size:.85rem;font-weight:600;padding:2px 0;min-height:30px;max-width:42vw}
 
 /* tabs: top on wide screens, bottom bar on phones ------------------------------------------------------------- */
 .tabs{display:none}
@@ -137,16 +141,17 @@ ul.vols a:hover{border-color:var(--accent)}
 ul.vols small{color:var(--muted)}
 .field{display:grid;gap:4px;margin:0 0 12px}
 .field>span{font-size:.8rem;color:var(--muted)}
-.field select{height:44px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);padding:0 10px;width:100%}
+.field select{height:44px;border:1.5px solid var(--edge);border-radius:12px;background:var(--bg);padding:0 10px;width:100%}
 .check{display:flex;align-items:center;gap:10px;margin:0 0 14px}
 .check input{width:20px;height:20px;accent-color:var(--accent)}
 .seg{display:flex;gap:6px;flex-wrap:wrap}
-.seg button{flex:1;min-width:90px;border:1.5px solid var(--line);background:var(--bg);border-radius:12px;padding:9px 8px}
+.seg button{flex:1;min-width:90px;border:1.5px solid var(--edge);background:var(--bg);border-radius:12px;padding:9px 8px}
 .seg button[aria-pressed=true]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink);font-weight:700}
 .row2{display:flex;gap:8px;margin-top:16px}
 .row2 .go{flex:1;border:0;background:var(--accent);color:var(--accent-ink);border-radius:12px;padding:12px;font-weight:700}
 .row2 .ghost{border:1.5px solid var(--line);background:transparent;border-radius:12px;padding:12px 16px}
 .foot{color:var(--muted);font-size:.78rem;margin-top:18px;line-height:1.6}
+.hint{border-inline-start:3px solid var(--gold);padding-inline-start:10px;margin:0 0 12px}
 
 /* wide screens ------------------------------------------------------------------------------------------------ */
 @media (min-width:860px){
@@ -163,17 +168,30 @@ ul.vols small{color:var(--muted)}
   [dir=rtl] .panel{animation-name:sider}
   @keyframes sider{from{transform:translateX(-24px);opacity:0}}
 }
+/* a phone held sideways: the header scrolls away with the page instead of covering half of the screen */
+@media (max-height:480px) and (orientation:landscape){
+  #top{position:static}
+  html{scroll-padding:8px 0 calc(56px + env(safe-area-inset-bottom))}
+  .bottomnav button{flex-direction:row;justify-content:center;gap:8px;padding:9px 2px;font-size:.8rem}
+  main{padding-bottom:calc(60px + env(safe-area-inset-bottom))}
+}
+/* the narrowest phones: the count and the sort order share one line; the word "Sort" is kept for screen readers only */
+@media (max-width:359px){
+  #sort-l{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  #sum{white-space:nowrap}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
+<noscript><style>#boot{display:none}</style><p class="boot">This catalog needs JavaScript: open it in a web browser, not in a file preview.<br><span lang="ar" dir="rtl">يحتاج هذا الفهرس إلى JavaScript: افتحه في متصفح، لا في معاينة الملفات.</span><br><span lang="fr">Ce catalogue a besoin de JavaScript : ouvrez-le dans un navigateur, pas dans un aperçu de fichier.</span></p></noscript>
 <div id="boot" class="boot">…</div>
 <div id="app" hidden>
   <header id="top">
     <div class="top-in">
       <div class="brand">
         <h1 id="ttl"></h1>
-        <nav id="tabs" class="tabs" aria-label="Views"></nav>
+        <nav id="tabs" class="tabs"></nav>
         <button id="btn-set" class="icon" type="button"></button>
       </div>
       <div class="searchrow">
@@ -182,58 +200,92 @@ ul.vols small{color:var(--muted)}
         <button id="btn-filter" class="btn" type="button"></button>
       </div>
       <div id="active" class="active"></div>
-      <div class="sumrow"><span id="sum"></span><label id="sortbox" class="sort"><span id="sort-l"></span><select id="sort"></select></label></div>
+      <div class="sumrow"><span id="sum" role="status"></span><label id="sortbox" class="sort"><span id="sort-l"></span><select id="sort"></select></label></div>
     </div>
   </header>
   <main id="main">
     <div id="vl"><div id="vl-in"></div></div>
     <div id="stats" class="stats" hidden></div>
   </main>
-  <nav id="nav" class="bottomnav" aria-label="Views"></nav>
+  <nav id="nav" class="bottomnav"></nav>
 </div>
 <div id="sheet" class="sheet" hidden>
   <div class="scrim" id="scrim"></div>
-  <section class="panel" id="panel" role="dialog" aria-modal="true" tabindex="-1">
+  <section class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-t" tabindex="-1">
     <button id="x" class="icon close" type="button"></button>
     <div id="panel-in"></div>
   </section>
 </div>
-<script id="data" type="text/plain" data-enc="json">{"v":1,"m":{"t":"مكتبة العربية الكلاسيكية","lg":"ar","gen":"2026-11-13","base":"","ver":"0.1.0"},"c":["الفلسفة والمنطق","التصوف والأخلاق","اللغة والنحو","البلاغة","أصول الفقه","التفسير وعلوم القرآن","العلوم الطبيعية","السياسة الشرعية","الحديث/الشروح والمختارات","التراجم والطبقات","الأدب/الشعر","الفقه/الشافعي","الأدب/النثر","التاريخ/التاريخ العام","الحديث/الصحاح","الحديث/السنن","السيرة النبوية","الأدب/النقد","العقيدة","الطب","الفقه/الظاهري","الحديث/المعاجم","الفقه/الحنبلي","التاريخ/فلسفة التاريخ","التاريخ/الخطط والبلدان","الفقه/المالكي","الرحلات والجغرافيا","الحديث/المسانيد","الأدب/المقامات"],"a":[["الفارابي",339,1],["الغزالي",505,1],["ابن قتيبة",276,1],["الزمخشري",538,1],["عبد القاهر الجرجاني",471,1],["ابن قيم الجوزية",751,1],["السيوطي",911,1],["البيروني",440,1],["الماوردي",450,1],["النووي",676,1],["ابن سينا",428,1],["ابن حجر العسقلاني",852,1],["أبو الفرج الأصفهاني",356,1],["الشافعي",204,1],["الجاحظ",255,1],["ابن كثير",774,1],["الزركشي",794,1],["البخاري",256,1],["الترمذي",279,1],["القرطبي",671,1],["القشيري",465,1],["النسائي",303,1],["ابن هشام",218,1],["ابن سعد",230,1],["ابن عبد ربه",328,1],["ابن تيمية",728,1],["ابن عربي",638,1],["ابن حزم",456,1],["أبو حنيفة النعمان",150,1],["ابن الأثير",630,1],["المبرد",286,1],["سيبويه",180,1],["الطبراني",360,1],["ابن قدامة",620,1],["ابن خلدون",808,1],["المقريزي",845,1],["الشاطبي",790,1],["مالك بن أنس",179,1],["ابن رشد",595,1],["الطبري",310,1],["ابن بطوطة",779,1],["ابن طفيل",581,1],["أبو نواس",198,1],["المتنبي",354,1],["ابن جبير",614,1],["ابن أبي زيد القيرواني",386,1],["أبو العلاء المعري",449,1],["ابن ماجه",273,1],["أبو داود السجستاني",275,1],["الذهبي",748,1],["القلقشندي",821,1],["مسلم بن الحجاج",261,1],["ابن الجوزي",597,1],["ابن الهيثم",430,1],["ابن المقفع",142,1],["ابن منظور",711,1],["خليل بن إسحاق",776,1],["المسعودي",346,1],["أحمد بن حنبل",241,1],["الحريري",516,1],["بديع الزمان الهمذاني",398,1],["الإدريسي",560,1],["الشوكاني",1250,1]],"l":["ar"],"f":[],"b":[["إحصاء العلوم",0,0,0,0,0,0,-1,"",0,0],["إحياء علوم الدين",1,1,1,0,0,0,-1,"",0,0],["أدب الكاتب",2,2,2,0,0,0,-1,"",0,0],["آراء أهل المدينة الفاضلة",0,0,3,0,0,0,-1,"",0,0],["أساس البلاغة",3,2,4,0,0,0,-1,"",0,0],["أسرار البلاغة",4,3,5,0,0,0,-1,"",0,0],["إعلام الموقعين عن رب العالمين",5,4,6,0,0,0,-1,"",0,0],["الإتقان في علوم القرآن",6,5,7,0,0,0,-1,"",0,0],["الآثار الباقية عن القرون الخالية",7,6,8,0,0,0,-1,"",0,0],["الأحكام السلطانية",8,7,9,0,0,0,-1,"",0,0],["الأربعون النووية",9,8,10,0,0,0,-1,"",0,0],["الإشارات والتنبيهات",10,0,11,0,0,0,-1,"",0,0],["الأشباه والنظائر",6,2,12,0,0,0,-1,"",0,0],["الإصابة في تمييز الصحابة",11,9,13,0,0,0,-1,"",0,0],["الأغاني",12,10,14,0,0,0,-1,"",0,0],["الأم",13,11,15,0,0,0,-1,"",0,0],["البخلاء",14,12,16,0,0,0,-1,"",0,0],["البداية والنهاية",15,13,17,0,0,0,-1,"",0,0],["البرهان في علوم القرآن",16,5,18,0,0,0,-1,"",0,0],["البيان والتبيين",14,12,19,0,0,0,-1,"",0,0],["الجامع الصحيح",17,14,20,0,0,0,-1,"",0,0],["الجامع الكبير",18,15,21,0,0,0,-1,"",0,0],["الجامع لأحكام القرآن",19,5,22,0,0,0,-1,"",0,0],["الحيوان",14,6,23,0,0,0,-1,"",0,0],["الرسالة",13,4,24,0,0,0,-1,"",0,0],["الرسالة القشيرية",20,1,25,0,0,0,-1,"",0,0],["السنن الكبرى",21,15,26,0,0,0,-1,"",0,0],["السيرة النبوية",22,16,27,0,0,0,-1,"",0,0],["الشعر والشعراء",2,17,28,0,0,0,-1,"",0,0],["الطبقات الكبرى",23,9,29,0,0,0,-1,"",0,0],["العقد الفريد",24,12,30,0,0,0,-1,"",0,0],["العقيدة الواسطية",25,18,31,0,0,0,-1,"",0,0],["الفتوحات المكية",26,1,32,0,0,0,-1,"",0,0],["الفتوى الحموية الكبرى",25,18,33,0,0,0,-1,"",0,0],["الفصل في الملل والأهواء والنحل",27,18,34,0,0,0,-1,"",0,0],["الفقه الأكبر",28,18,35,0,0,0,-1,"",0,0],["القانون في الطب",10,19,36,0,0,0,-1,"",0,0],["الكامل في التاريخ",29,13,37,0,0,0,-1,"",0,0],["الكامل في اللغة والأدب",30,2,38,0,0,0,-1,"",0,0],["الكتاب",31,2,39,0,0,0,-1,"",0,0],["الكشاف عن حقائق التنزيل",3,5,40,0,0,0,-1,"",0,0],["المجموع شرح المهذب",9,11,41,0,0,0,-1,"",0,0],["المحلى بالآثار",27,20,42,0,0,0,-1,"",0,0],["المستصفى من علم الأصول",1,4,43,0,0,0,-1,"",0,0],["المعجم الكبير",32,21,44,0,0,0,-1,"",0,0],["المغني",33,22,45,0,0,0,-1,"",0,0],["المقدمة",34,23,46,0,0,0,-1,"",0,0],["المنقذ من الضلال",1,1,47,0,0,0,-1,"",0,0],["المواعظ والاعتبار بذكر الخطط والآثار",35,24,48,0,0,0,-1,"",0,0],["الموافقات",36,4,49,0,0,0,-1,"",0,0],["الموطأ",37,15,50,0,0,0,-1,"",0,0],["بداية المجتهد ونهاية المقتصد",38,25,51,0,0,0,-1,"",0,0],["تاريخ الرسل والملوك",39,13,52,0,0,0,-1,"",0,0],["تحفة النظار في غرائب الأمصار وعجائب الأسفار",40,26,53,0,0,0,-1,"",0,0],["تحقيق ما للهند من مقولة",7,6,54,0,0,0,-1,"",0,0],["تفسير القرآن العظيم",15,5,55,0,0,0,-1,"",0,0],["تهافت التهافت",38,0,56,0,0,0,-1,"",0,0],["تهافت الفلاسفة",1,0,57,0,0,0,-1,"",0,0],["جامع البيان عن تأويل آي القرآن",39,5,58,0,0,0,-1,"",0,0],["حي بن يقظان",41,0,59,0,0,0,-1,"",0,0],["دلائل الإعجاز",4,3,60,0,0,0,-1,"",0,0],["ديوان أبي نواس",42,10,61,0,0,0,-1,"",0,0],["ديوان المتنبي",43,10,62,0,0,0,-1,"",0,0],["رحلة ابن جبير",44,26,63,0,0,0,-1,"",0,0],["رسالة ابن أبي زيد القيرواني",45,25,64,0,0,0,-1,"",0,0],["رسالة الغفران",46,12,65,0,0,0,-1,"",0,0],["رياض الصالحين",9,8,66,0,0,0,-1,"",0,0],["زاد المعاد في هدي خير العباد",5,16,67,0,0,0,-1,"",0,0],["سقط الزند",46,10,68,0,0,0,-1,"",0,0],["سنن ابن ماجه",47,15,69,0,0,0,-1,"",0,0],["سنن أبي داود",48,15,70,0,0,0,-1,"",0,0],["سير أعلام النبلاء",49,9,71,0,0,0,-1,"",0,0],["صبح الأعشى في صناعة الإنشا",50,12,72,0,0,0,-1,"",0,0],["صحيح مسلم",51,14,73,0,0,0,-1,"",0,0],["صيد الخاطر",52,1,74,0,0,0,-1,"",0,0],["طوق الحمامة في الألفة والألّاف",27,12,75,0,0,0,-1,"",0,0],["عيون الأخبار",2,12,76,0,0,0,-1,"",0,0],["فتح الباري بشرح صحيح البخاري",11,8,77,0,0,0,-1,"",0,0],["فصل المقال فيما بين الحكمة والشريعة من الاتصال",38,0,78,0,0,0,-1,"",0,0],["فصوص الحكم",26,1,79,0,0,0,-1,"",0,0],["كتاب العبر وديوان المبتدأ والخبر",34,23,80,0,0,0,-1,"",0,0],["كتاب المناظر",53,6,81,0,0,0,-1,"",0,0],["كليلة ودمنة",54,12,82,0,0,0,-1,"",0,0],["لسان العرب",55,2,83,0,0,0,-1,"",0,0],["مجموع الفتاوى",25,18,84,0,0,0,-1,"",0,0],["مختصر خليل",56,25,85,0,0,0,-1,"",0,0],["مدارج السالكين",5,1,86,0,0,0,-1,"",0,0],["مروج الذهب ومعادن الجوهر",57,13,87,0,0,0,-1,"",0,0],["مسند الإمام أحمد",58,27,88,0,0,0,-1,"",0,0],["مقامات الحريري",59,28,89,0,0,0,-1,"",0,0],["مقامات بديع الزمان الهمذاني",60,28,90,0,0,0,-1,"",0,0],["منهاج السنة النبوية",25,18,91,0,0,0,-1,"",0,0],["منهاج الطالبين",9,11,92,0,0,0,-1,"",0,0],["نزهة المشتاق في اختراق الآفاق",61,26,93,0,0,0,-1,"",0,0],["نيل الأوطار",62,8,94,0,0,0,-1,"",0,0]]}</script>
+<script id="data" type="text/plain" data-enc="json">{"v":1,"m":{"t":"مكتبة العربية الكلاسيكية","lg":"ar","gen":"2026-11-21","base":"","ver":"0.1.0"},"c":["الفلسفة والمنطق","التصوف والأخلاق","اللغة والنحو","البلاغة","أصول الفقه","التفسير وعلوم القرآن","العلوم الطبيعية","السياسة الشرعية","الحديث/الشروح والمختارات","التراجم والطبقات","الأدب/الشعر","الفقه/الشافعي","الأدب/النثر","التاريخ/التاريخ العام","الحديث/الصحاح","الحديث/السنن","السيرة النبوية","الأدب/النقد","العقيدة","الطب","الفقه/الظاهري","الحديث/المعاجم","الفقه/الحنبلي","التاريخ/فلسفة التاريخ","التاريخ/الخطط والبلدان","الفقه/المالكي","الرحلات والجغرافيا","الحديث/المسانيد","الأدب/المقامات"],"a":[["الفارابي",339,1],["الغزالي",505,1],["ابن قتيبة",276,1],["الزمخشري",538,1],["عبد القاهر الجرجاني",471,1],["ابن قيم الجوزية",751,1],["السيوطي",911,1],["البيروني",440,1],["الماوردي",450,1],["النووي",676,1],["ابن سينا",428,1],["ابن حجر العسقلاني",852,1],["أبو الفرج الأصفهاني",356,1],["الشافعي",204,1],["الجاحظ",255,1],["ابن كثير",774,1],["الزركشي",794,1],["البخاري",256,1],["الترمذي",279,1],["القرطبي",671,1],["القشيري",465,1],["النسائي",303,1],["ابن هشام",218,1],["ابن سعد",230,1],["ابن عبد ربه",328,1],["ابن تيمية",728,1],["ابن عربي",638,1],["ابن حزم",456,1],["أبو حنيفة النعمان",150,1],["ابن الأثير",630,1],["المبرد",286,1],["سيبويه",180,1],["الطبراني",360,1],["ابن قدامة",620,1],["ابن خلدون",808,1],["المقريزي",845,1],["الشاطبي",790,1],["مالك بن أنس",179,1],["ابن رشد",595,1],["الطبري",310,1],["ابن بطوطة",779,1],["ابن طفيل",581,1],["أبو نواس",198,1],["المتنبي",354,1],["ابن جبير",614,1],["ابن أبي زيد القيرواني",386,1],["أبو العلاء المعري",449,1],["ابن ماجه",273,1],["أبو داود السجستاني",275,1],["الذهبي",748,1],["القلقشندي",821,1],["مسلم بن الحجاج",261,1],["ابن الجوزي",597,1],["ابن الهيثم",430,1],["ابن المقفع",142,1],["ابن منظور",711,1],["خليل بن إسحاق",776,1],["المسعودي",346,1],["أحمد بن حنبل",241,1],["الحريري",516,1],["بديع الزمان الهمذاني",398,1],["الإدريسي",560,1],["الشوكاني",1250,1]],"l":["ar"],"f":[],"b":[["إحصاء العلوم",0,0,0,0,0,0,-1,"",0,0],["إحياء علوم الدين",1,1,1,0,0,0,-1,"",0,0],["أدب الكاتب",2,2,2,0,0,0,-1,"",0,0],["آراء أهل المدينة الفاضلة",0,0,3,0,0,0,-1,"",0,0],["أساس البلاغة",3,2,4,0,0,0,-1,"",0,0],["أسرار البلاغة",4,3,5,0,0,0,-1,"",0,0],["إعلام الموقعين عن رب العالمين",5,4,6,0,0,0,-1,"",0,0],["الإتقان في علوم القرآن",6,5,7,0,0,0,-1,"",0,0],["الآثار الباقية عن القرون الخالية",7,6,8,0,0,0,-1,"",0,0],["الأحكام السلطانية",8,7,9,0,0,0,-1,"",0,0],["الأربعون النووية",9,8,10,0,0,0,-1,"",0,0],["الإشارات والتنبيهات",10,0,11,0,0,0,-1,"",0,0],["الأشباه والنظائر",6,2,12,0,0,0,-1,"",0,0],["الإصابة في تمييز الصحابة",11,9,13,0,0,0,-1,"",0,0],["الأغاني",12,10,14,0,0,0,-1,"",0,0],["الأم",13,11,15,0,0,0,-1,"",0,0],["البخلاء",14,12,16,0,0,0,-1,"",0,0],["البداية والنهاية",15,13,17,0,0,0,-1,"",0,0],["البرهان في علوم القرآن",16,5,18,0,0,0,-1,"",0,0],["البيان والتبيين",14,12,19,0,0,0,-1,"",0,0],["الجامع الصحيح",17,14,20,0,0,0,-1,"",0,0],["الجامع الكبير",18,15,21,0,0,0,-1,"",0,0],["الجامع لأحكام القرآن",19,5,22,0,0,0,-1,"",0,0],["الحيوان",14,6,23,0,0,0,-1,"",0,0],["الرسالة",13,4,24,0,0,0,-1,"",0,0],["الرسالة القشيرية",20,1,25,0,0,0,-1,"",0,0],["السنن الكبرى",21,15,26,0,0,0,-1,"",0,0],["السيرة النبوية",22,16,27,0,0,0,-1,"",0,0],["الشعر والشعراء",2,17,28,0,0,0,-1,"",0,0],["الطبقات الكبرى",23,9,29,0,0,0,-1,"",0,0],["العقد الفريد",24,12,30,0,0,0,-1,"",0,0],["العقيدة الواسطية",25,18,31,0,0,0,-1,"",0,0],["الفتوحات المكية",26,1,32,0,0,0,-1,"",0,0],["الفتوى الحموية الكبرى",25,18,33,0,0,0,-1,"",0,0],["الفصل في الملل والأهواء والنحل",27,18,34,0,0,0,-1,"",0,0],["الفقه الأكبر",28,18,35,0,0,0,-1,"",0,0],["القانون في الطب",10,19,36,0,0,0,-1,"",0,0],["الكامل في التاريخ",29,13,37,0,0,0,-1,"",0,0],["الكامل في اللغة والأدب",30,2,38,0,0,0,-1,"",0,0],["الكتاب",31,2,39,0,0,0,-1,"",0,0],["الكشاف عن حقائق التنزيل",3,5,40,0,0,0,-1,"",0,0],["المجموع شرح المهذب",9,11,41,0,0,0,-1,"",0,0],["المحلى بالآثار",27,20,42,0,0,0,-1,"",0,0],["المستصفى من علم الأصول",1,4,43,0,0,0,-1,"",0,0],["المعجم الكبير",32,21,44,0,0,0,-1,"",0,0],["المغني",33,22,45,0,0,0,-1,"",0,0],["المقدمة",34,23,46,0,0,0,-1,"",0,0],["المنقذ من الضلال",1,1,47,0,0,0,-1,"",0,0],["المواعظ والاعتبار بذكر الخطط والآثار",35,24,48,0,0,0,-1,"",0,0],["الموافقات",36,4,49,0,0,0,-1,"",0,0],["الموطأ",37,15,50,0,0,0,-1,"",0,0],["بداية المجتهد ونهاية المقتصد",38,25,51,0,0,0,-1,"",0,0],["تاريخ الرسل والملوك",39,13,52,0,0,0,-1,"",0,0],["تحفة النظار في غرائب الأمصار وعجائب الأسفار",40,26,53,0,0,0,-1,"",0,0],["تحقيق ما للهند من مقولة",7,6,54,0,0,0,-1,"",0,0],["تفسير القرآن العظيم",15,5,55,0,0,0,-1,"",0,0],["تهافت التهافت",38,0,56,0,0,0,-1,"",0,0],["تهافت الفلاسفة",1,0,57,0,0,0,-1,"",0,0],["جامع البيان عن تأويل آي القرآن",39,5,58,0,0,0,-1,"",0,0],["حي بن يقظان",41,0,59,0,0,0,-1,"",0,0],["دلائل الإعجاز",4,3,60,0,0,0,-1,"",0,0],["ديوان أبي نواس",42,10,61,0,0,0,-1,"",0,0],["ديوان المتنبي",43,10,62,0,0,0,-1,"",0,0],["رحلة ابن جبير",44,26,63,0,0,0,-1,"",0,0],["رسالة ابن أبي زيد القيرواني",45,25,64,0,0,0,-1,"",0,0],["رسالة الغفران",46,12,65,0,0,0,-1,"",0,0],["رياض الصالحين",9,8,66,0,0,0,-1,"",0,0],["زاد المعاد في هدي خير العباد",5,16,67,0,0,0,-1,"",0,0],["سقط الزند",46,10,68,0,0,0,-1,"",0,0],["سنن ابن ماجه",47,15,69,0,0,0,-1,"",0,0],["سنن أبي داود",48,15,70,0,0,0,-1,"",0,0],["سير أعلام النبلاء",49,9,71,0,0,0,-1,"",0,0],["صبح الأعشى في صناعة الإنشا",50,12,72,0,0,0,-1,"",0,0],["صحيح مسلم",51,14,73,0,0,0,-1,"",0,0],["صيد الخاطر",52,1,74,0,0,0,-1,"",0,0],["طوق الحمامة في الألفة والألّاف",27,12,75,0,0,0,-1,"",0,0],["عيون الأخبار",2,12,76,0,0,0,-1,"",0,0],["فتح الباري بشرح صحيح البخاري",11,8,77,0,0,0,-1,"",0,0],["فصل المقال فيما بين الحكمة والشريعة من الاتصال",38,0,78,0,0,0,-1,"",0,0],["فصوص الحكم",26,1,79,0,0,0,-1,"",0,0],["كتاب العبر وديوان المبتدأ والخبر",34,23,80,0,0,0,-1,"",0,0],["كتاب المناظر",53,6,81,0,0,0,-1,"",0,0],["كليلة ودمنة",54,12,82,0,0,0,-1,"",0,0],["لسان العرب",55,2,83,0,0,0,-1,"",0,0],["مجموع الفتاوى",25,18,84,0,0,0,-1,"",0,0],["مختصر خليل",56,25,85,0,0,0,-1,"",0,0],["مدارج السالكين",5,1,86,0,0,0,-1,"",0,0],["مروج الذهب ومعادن الجوهر",57,13,87,0,0,0,-1,"",0,0],["مسند الإمام أحمد",58,27,88,0,0,0,-1,"",0,0],["مقامات الحريري",59,28,89,0,0,0,-1,"",0,0],["مقامات بديع الزمان الهمذاني",60,28,90,0,0,0,-1,"",0,0],["منهاج السنة النبوية",25,18,91,0,0,0,-1,"",0,0],["منهاج الطالبين",9,11,92,0,0,0,-1,"",0,0],["نزهة المشتاق في اختراق الآفاق",61,26,93,0,0,0,-1,"",0,0],["نيل الأوطار",62,8,94,0,0,0,-1,"",0,0]]}</script>
 <script>// Search folding: the browser twin of pocketshelf/fold.py (the two are tested against each other).
 const FOLD_MAP = {
-  'أ':'ا','إ':'ا','آ':'ا','ٱ':'ا','ٲ':'ا','ٳ':'ا','ى':'ي','ی':'ي','ې':'ي','ئ':'ي','ة':'ه','ۀ':'ه','ھ':'ه','ہ':'ه','ؤ':'و','ک':'ك','گ':'ك',
-  'æ':'ae','œ':'oe','ß':'ss','ø':'o','đ':'d','ð':'d','ł':'l','þ':'th','ı':'i'
+  'أ':'ا','إ':'ا','آ':'ا','ٱ':'ا','ٲ':'ا','ٳ':'ا','ى':'ي','ی':'ي','ې':'ي','ئ':'ي','ے':'ي','ة':'ه','ۀ':'ه','ھ':'ه','ہ':'ه','ۃ':'ه','ە':'ه','ؤ':'و',
+  'ک':'ك','گ':'ك','ڪ':'ك','ڭ':'ك',
+  'æ':'ae','œ':'oe','ß':'ss','ø':'o','đ':'d','ð':'d','ł':'l','þ':'th','ı':'i','ς':'σ'
 };
 const FOLD_MAP_RE = new RegExp('[' + Object.keys(FOLD_MAP).join('') + ']', 'g');
-const FOLD_DROP_RE = /[\p{M}ـءʿʾʻʼʽ'’‘`´ʹʺ]/gu;
+const FOLD_DROP_RE = /[\p{M}\p{Cf}ـءʿʾʻʼʽ'’‘`´ʹʺ]/gu;
 const FOLD_DIGITS = {'٠':0,'١':1,'٢':2,'٣':3,'٤':4,'٥':5,'٦':6,'٧':7,'٨':8,'٩':9,'۰':0,'۱':1,'۲':2,'۳':3,'۴':4,'۵':5,'۶':6,'۷':7,'۸':8,'۹':9};
 const FOLD_DIGITS_RE = /[٠-٩۰-۹]/g;
 const FOLD_NONWORD_RE = /[^\p{L}\p{N}]+/gu;
 const FOLD_ASCII_RE = /^[\x00-\x7f]*$/;
+const FOLD_TAIL_RE = /[\p{M}ـء]/u;
+
+// Folding is context-free: a string folds one character at a time, so each distinct character is worked out
+// once and then looked up ('' = dropped, ' ' = a word break, else its folded letters).
+const FOLD_BMP = new Array(0x10000), FOLD_ASTRAL = new Map();
+function foldChar(ch) {
+  let d = ch.normalize('NFKD').toLowerCase().replace(FOLD_DROP_RE, '');
+  d = d.replace(FOLD_MAP_RE, c => FOLD_MAP[c]).replace(FOLD_DIGITS_RE, c => FOLD_DIGITS[c]);
+  return d.replace(FOLD_NONWORD_RE, ' ');
+}
+// Folded text of the character that starts at s[i] (a surrogate pair counts as one character).
+function foldAt(s, i) {
+  const c = s.charCodeAt(i);
+  if (c < 0xd800 || c > 0xdbff) { const f = FOLD_BMP[c]; return f === undefined ? (FOLD_BMP[c] = foldChar(s[i])) : f; }
+  const ch = String.fromCodePoint(s.codePointAt(i));
+  let f = FOLD_ASTRAL.get(ch);
+  if (f === undefined) FOLD_ASTRAL.set(ch, f = foldChar(ch));
+  return f;
+}
 
 function fold(s) {
   s = s == null ? '' : String(s);
   if (FOLD_ASCII_RE.test(s)) return s.toLowerCase().replace(/['`]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
-  s = s.normalize('NFKD').toLowerCase().replace(FOLD_DROP_RE, '');
-  s = s.replace(FOLD_MAP_RE, c => FOLD_MAP[c]).replace(FOLD_DIGITS_RE, c => FOLD_DIGITS[c]);
-  return s.replace(FOLD_NONWORD_RE, ' ').trim();
+  let out = '', gap = false;
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charCodeAt(i);
+    let f;
+    if (c < 0xd800 || c > 0xdbff) { f = FOLD_BMP[c]; if (f === undefined) f = FOLD_BMP[c] = foldChar(s[i]); }
+    else { f = foldAt(s, i); if (s.codePointAt(i) > 0xffff) i++; }
+    if (f === '') continue;
+    if (f === ' ') { gap = true; continue; }
+    if (f.length > 1 && f.indexOf(' ') >= 0) {            // a compatibility character that unfolds to several words
+      for (const part of f.split(' ')) { if (part) out += (gap && out ? ' ' : '') + part; gap = true; }
+      gap = f[f.length - 1] === ' ';
+      continue;
+    }
+    out += gap && out ? ' ' + f : f;
+    gap = false;
+  }
+  return out;
 }
 
 // Same folding, but keeps a map from folded positions back to the original string (for highlighting).
 function foldMap(s) {
   s = s == null ? '' : String(s);
-  let t = '', map = [], i = 0;
-  for (const ch of s) {
-    const len = ch.length;
-    let d = ch.normalize('NFKD').toLowerCase().replace(FOLD_DROP_RE, '');
-    d = d.replace(FOLD_MAP_RE, c => FOLD_MAP[c]).replace(FOLD_DIGITS_RE, c => FOLD_DIGITS[c]).replace(FOLD_NONWORD_RE, ' ');
+  let t = '', map = [];
+  for (let i = 0; i < s.length; i++) {
+    const d = foldAt(s, i), len = s.codePointAt(i) > 0xffff ? 2 : 1;
     for (let k = 0; k < d.length; k++) { t += d[k]; map.push([i, i + len]); }
-    i += len;
+    i += len - 1;
   }
   return { t, map };
 }
 
 // <mark> the parts of `s` that match any folded token (accent- and variant-insensitive); returns escaped HTML.
+// A match is marked as one run: the vowel marks, tatweel or hamza inside it and right after it stay in the mark,
+// so a vowelled Arabic word is not cut into pieces.
 function highlight(s, tokens, esc) {
   s = s == null ? '' : String(s);
   if (!tokens.length || !s) return esc(s);
@@ -242,9 +294,11 @@ function highlight(s, tokens, esc) {
   for (const tok of tokens) {
     if (!tok) continue;
     for (let p = t.indexOf(tok); p >= 0; p = t.indexOf(tok, p + 1)) {
-      for (let k = p; k < p + tok.length; k++) for (let j = map[k][0]; j < map[k][1]; j++) hit[j] = 1;
+      const end = map[p + tok.length - 1][1];
+      for (let j = map[p][0]; j < end; j++) hit[j] = 1;
     }
   }
+  for (let j = 1; j < s.length; j++) if (hit[j - 1] && !hit[j] && FOLD_TAIL_RE.test(s[j])) hit[j] = 1;
   let out = '', on = false, buf = '';
   const flush = () => { if (buf) out += on ? '<mark>' + esc(buf) + '</mark>' : esc(buf); buf = ''; };
   for (let j = 0; j < s.length; j++) { if (!!hit[j] !== on) { flush(); on = !!hit[j]; } buf += s[j]; }
@@ -282,7 +336,8 @@ const T = {
     quality: 'What the catalog knows', with_author: 'with an author', with_year: 'with a year', with_cat: 'with a category', with_file: 'with a file',
     with_death: 'authors with a death year', multi: 'books with several editions', loading_err: 'This browser cannot read the catalog (it needs DecompressionStream). Rebuild with --no-compress or update the browser.',
     ah: 'AH', ce: 'CE', bce: 'BCE', cent: n => ordEn(n) + ' c.', jump: 'Jump to century', books_n: { one: '{n} book', other: '{n} books' },
-    pick_author: 'Show only this author', pick_cat: 'Show this category',
+    pick_author: 'Show only this author', pick_cat: 'Show this category', views: 'Views', remove: 'Remove the filter: {x}', aka: 'Also known as',
+    content_hint: 'If the book does not open: this page was opened through the file manager. Open it by its file address instead: type file:///sdcard/ in the address bar, browse to this page and bookmark it.',
   },
   ar: {
     dir: 'rtl', name: 'العربية', search: 'ابحث في الكتب والمؤلفين…', filters: 'تصفية', settings: 'الإعدادات', sort: 'الترتيب',
@@ -302,7 +357,8 @@ const T = {
     quality: 'ما يعرفه الفهرس', with_author: 'لها مؤلف', with_year: 'لها سنة', with_cat: 'لها قسم', with_file: 'لها ملف',
     with_death: 'مؤلفون لهم سنة وفاة', multi: 'كتب بطبعات متعددة', loading_err: 'لا يستطيع هذا المتصفح قراءة الفهرس (يحتاج DecompressionStream). أعد البناء بخيار --no-compress أو حدّث المتصفح.',
     ah: 'هـ', ce: 'م', bce: 'ق.م', cent: n => 'القرن ' + n, jump: 'اقفز إلى قرن', books_n: { one: 'كتاب واحد', two: 'كتابان', few: '{n} كتب', many: '{n} كتابًا', other: '{n} كتاب' },
-    pick_author: 'اعرض هذا المؤلف فقط', pick_cat: 'اعرض هذا القسم',
+    pick_author: 'اعرض هذا المؤلف فقط', pick_cat: 'اعرض هذا القسم', views: 'طرق العرض', remove: 'أزل التصفية: {x}', aka: 'عناوين أخرى',
+    content_hint: 'إن لم يُفتح الكتاب: فُتحت هذه الصفحة من مدير الملفات. افتحها بعنوان ملفها: اكتب file:///sdcard/ في شريط العنوان، ثم تصفّح إلى هذه الصفحة واحفظها في المفضلة.',
   },
   fr: {
     dir: 'ltr', name: 'Français', search: 'Titre, auteur…', filters: 'Filtres', settings: 'Réglages', sort: 'Tri',
@@ -321,7 +377,8 @@ const T = {
     quality: 'Ce que le catalogue sait', with_author: 'avec auteur', with_year: 'avec année', with_cat: 'avec catégorie', with_file: 'avec fichier',
     with_death: 'auteurs avec année de décès', multi: 'livres en plusieurs éditions', loading_err: 'Ce navigateur ne peut pas lire le catalogue (DecompressionStream requis). Reconstruisez avec --no-compress ou mettez à jour le navigateur.',
     ah: 'H', ce: 'EC', bce: 'av. J.-C.', cent: n => (n === 1 ? '1er' : n + 'e') + ' s.', jump: 'Aller au siècle', books_n: { one: '{n} livre', other: '{n} livres' },
-    pick_author: 'Voir seulement cet auteur', pick_cat: 'Voir cette catégorie',
+    pick_author: 'Voir seulement cet auteur', pick_cat: 'Voir cette catégorie', views: 'Vues', remove: 'Retirer le filtre : {x}', aka: 'Autres titres',
+    content_hint: 'Si le livre ne s’ouvre pas : cette page a été ouverte depuis le gestionnaire de fichiers. Ouvrez-la par son adresse de fichier : tapez file:///sdcard/ dans la barre d’adresse, naviguez jusqu’à cette page et ajoutez-la aux favoris.',
   },
 };
 function ordEn(n) { const m = n % 100; if (m >= 11 && m <= 13) return n + 'th'; return n + ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] || 'th'); }
@@ -370,39 +427,58 @@ for (const w of W) {
 }
 // The folded search texts are built lazily (right after the first paint, or at the first query): the page opens
 // before the index exists, which is what keeps a 20,000-book catalog quick to open on a phone.
-let indexed = false;
-function buildIndex() {
-  if (indexed) return; indexed = true;
-  for (const a of A) a.f = fold(a.n);
-  for (const b of B) { b.tf = fold(b.t); b.af = b.a >= 0 ? A[b.a].f : ''; }
-  for (const w of W) {
-    const parts = [];
-    for (const b of w.bs) parts.push(b.tf, b.af, fold([b.d.e, b.d.p, b.d.pl, b.d.ed, b.d.s, b.d.i, (b.d.t || []).join(' '), b.d.x ? Object.values(b.d.x).join(' ') : '', b.c >= 0 ? D.c[b.c] : ''].join(' ')));
-    w.h = parts.join(' ');
+// It is built in short slices so that scrolling and typing stay smooth while it grows; a query finishes it at once.
+let ixAuthors = false, ixWorks = 0;
+const DETAILS = ['e', 'p', 'pl', 'ed', 's', 'i'], catFold = [];
+function indexSome(budgetMs) {
+  const t = budgetMs ? performance.now() : 0;
+  if (!ixAuthors) { for (const a of A) a.f = fold(a.n); ixAuthors = true; }
+  for (; ixWorks < W.length; ixWorks++) {
+    if (budgetMs && (ixWorks & 63) === 0 && performance.now() - t > budgetMs) return false;
+    const w = W[ixWorks]; let h = '';
+    for (const b of w.bs) {
+      const d = b.d; let x = '';
+      b.tf = fold(b.t); b.af = b.a >= 0 ? A[b.a].f : '';
+      for (const k of DETAILS) if (d[k]) x += ' ' + d[k];
+      if (d.at) x += ' ' + d.at.join(' ');
+      if (d.t) x += ' ' + d.t.join(' ');
+      if (d.x) x += ' ' + Object.values(d.x).join(' ');
+      if (b.c >= 0 && catFold[b.c] === undefined) catFold[b.c] = fold(D.c[b.c]);
+      h += (h ? ' ' : '') + b.tf + ' ' + b.af + (x ? ' ' + fold(x) : '') + (b.c >= 0 ? ' ' + catFold[b.c] : '');
+    }
+    w.h = h;
   }
+  return true;
 }
+const buildIndex = () => { indexSome(0); };
+const indexInBackground = () => { if (!indexSome(8)) setTimeout(indexInBackground, 0); };
 const HASFILES = B.some(b => b.fl && b.fl.length);
 const tModel = performance.now() - t0 - tLoad;
 const catPaths = D.c.map(c => c.split('/'));
 
 /* ------------------------------------------------------------------------------------------------ state */
 const S = { view: 'browse', q: '', cat: '', author: -1, lang: '', fmt: '', cent: '', multi: false, sort: 'rel', open: '' };
+const SORTS = ['rel', 'title', 'author', 'year', 'size', 'added'];
+// A hash can be a bookmark made before the catalog was rebuilt: every value is checked against the data.
 function readHash() {
   const p = new URLSearchParams(location.hash.slice(1));
+  const idx = (k, n) => { const v = p.get(k); return v !== null && /^\d+$/.test(v) && +v < n ? +v : -1; };
   S.view = ['browse', 'cats', 'authors', 'stats'].includes(p.get('v')) ? p.get('v') : 'browse';
-  S.q = p.get('q') || ''; S.cat = p.get('cat') || ''; S.author = p.has('au') ? +p.get('au') : -1;
-  S.lang = p.get('lg') || ''; S.fmt = p.get('fm') || ''; S.cent = p.get('ce') || ''; S.multi = p.get('mu') === '1';
-  S.sort = p.get('so') || 'rel'; S.open = p.get('b') || '';
+  S.q = p.get('q') || ''; S.cat = p.get('cat') || ''; S.author = idx('au', A.length);
+  S.lang = p.get('lg') || ''; S.fmt = p.get('fm') || ''; S.cent = /^(ah|ce):-?\d+$/.test(p.get('ce') || '') ? p.get('ce') : ''; S.multi = p.get('mu') === '1';
+  S.sort = SORTS.includes(p.get('so')) ? p.get('so') : 'rel'; S.open = idx('b', W.length) >= 0 ? p.get('b') : '';
 }
-function writeHash(push) {
+// `state` marks a history entry that exists only to hold an open panel, so that Back closes the panel.
+function writeHash(push, state) {
   const p = new URLSearchParams();
   if (S.view !== 'browse') p.set('v', S.view);
   if (S.q) p.set('q', S.q); if (S.cat) p.set('cat', S.cat); if (S.author >= 0) p.set('au', S.author);
   if (S.lang) p.set('lg', S.lang); if (S.fmt) p.set('fm', S.fmt); if (S.cent) p.set('ce', S.cent); if (S.multi) p.set('mu', '1');
   if (S.sort !== 'rel') p.set('so', S.sort); if (S.open) p.set('b', S.open);
   const h = p.toString() ? '#' + p.toString() : location.pathname + location.search;
-  try { push ? history.pushState(null, '', h) : history.replaceState(null, '', h); } catch (_) {}
+  try { push ? history.pushState(state || null, '', h) : history.replaceState(state === undefined ? history.state : state, '', h); } catch (_) {}
 }
+const inPanelEntry = () => { try { return !!(history.state && history.state.panel); } catch (_) { return false; } };
 readHash();
 
 /* ------------------------------------------------------------------------------------------------ helpers */
@@ -420,7 +496,8 @@ const tr = (k, o) => {
 const bytes = n => n >= 1e9 ? (n / 1e9).toFixed(1) + ' GB' : n >= 1e6 ? (n / 1e6).toFixed(n < 1.6e7 ? 1 : 0) + ' MB' : n >= 1e3 ? Math.round(n / 1e3) + ' KB' : n ? n + ' B' : '';
 const centLabel = (c, cal) => c === 0 ? tr('unknown') : c < 0 ? tr('cent', -c) + ' ' + tr('bce') : tr('cent', c) + ' ' + tr(cal);
 const lifeLabel = a => !a.d ? '' : tr('died', { y: Math.abs(a.d) + ' ' + (a.d < 0 ? tr('bce') : tr(a.cal)) }) + (a.cal === 'ah' ? ' (' + ceOf(a.d, 'ah') + ' ' + tr('ce') + ')' : '');
-const href = p => /^[a-z][a-z0-9+.-]*:/i.test(p) ? p : (D.m.base || '') + p.split('/').map(encodeURIComponent).join('/');
+const ABS_URL = /^[a-z][a-z0-9+.-]*:\/\//i;        // "https://…" is a link as it stands; "Dune: Messiah.epub" is a file name
+const href = p => ABS_URL.test(p) ? p : (D.m.base || '') + p.split('/').map(encodeURIComponent).join('/');
 const svg = d => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
 const ICON = {
   books: svg('<path d="M5 4h4v16H5zM11 4h4v16h-4zM17.5 5.5l3.5 1-4 14-3.5-1z"/>'),
@@ -439,17 +516,34 @@ function computeCatSet() {
   catSet = new Set(); D.c.forEach((c, i) => { if (c === S.cat || c.startsWith(S.cat + '/')) catSet.add(i); });
 }
 let RES = [];
-function matchWork(w, toks) {
-  for (let i = 0; i < toks.length; i++) if (w.h.indexOf(toks[i]) < 0) return false;
-  return true;
+// The words of a query, each with the other spellings that count as the same word:
+// «عبدالله» is also written «عبد الله», and «ابن» between two names is written «بن».
+function queryWords(q) {
+  return fold(q).split(' ').filter(Boolean).map(t => {
+    if (t.length > 5 && t.startsWith('عبدال')) return [t, 'عبد ' + t.slice(3)];
+    return t === 'ابن' ? [t, 'بن'] : [t];
+  });
+}
+const hasWord = (text, alts) => { for (let i = 0; i < alts.length; i++) if (text.indexOf(alts[i]) >= 0) return true; return false; };
+const hasWords = (text, words) => { for (let i = 0; i < words.length; i++) if (!hasWord(text, words[i])) return false; return true; };
+const byText = (x, y) => x < y ? -1 : x > y ? 1 : 0;   // folded texts sort well by code point; no collator needed
+// Authors are ranked once by their folded names; sorting books by author is then a sort of whole numbers.
+let authorRank = null;
+function rankAuthors() {
+  if (authorRank) return authorRank;
+  authorRank = new Int32Array(A.length);
+  A.map(a => a.i).sort((x, y) => byText(A[x].f, A[y].f)).forEach((ai, r) => { authorRank[ai] = r; });
+  return authorRank;
 }
 function filterWorks() {
   computeCatSet();
-  const toks = fold(S.q).split(' ').filter(Boolean);
-  if (toks.length || S.sort === 'author') buildIndex();
+  const toks = queryWords(S.q), n = toks.length;
+  const plain = toks.every(a => a.length === 1) ? toks.map(a => a[0]) : null;   // the usual case: no second spelling to try
+  if (n || S.sort === 'author') buildIndex();
   const out = [];
   for (const w of W) {
-    if (toks.length && !matchWork(w, toks)) continue;
+    if (plain) { const h = w.h; let i = 0; while (i < n && h.indexOf(plain[i]) >= 0) i++; if (i < n) continue; }
+    else if (!hasWords(w.h, toks)) continue;
     if (S.multi && w.bs.length < 2) continue;
     if (catSet || S.author >= 0 || S.lang || S.fmt || S.cent) {
       let ok = false;
@@ -466,18 +560,27 @@ function filterWorks() {
     out.push(w);
   }
   if (toks.length && S.sort === 'rel') {
+    // scores are small whole numbers and `out` is in title order: one pass into buckets ranks it
+    const whole = toks.map(a => a[0]).join(' '), buckets = [];
     for (const w of out) {
       let s = 0;
-      for (const tk of toks) {
-        const p = w.rep.tf.indexOf(tk);
-        if (p === 0) s += 6; else if (p > 0 && w.rep.tf[p - 1] === ' ') s += 4; else if (p > 0) s += 2;
-        else if (w.rep.af.indexOf(tk) >= 0) s += 2;
+      const tf = w.rep.tf, af = w.rep.af;
+      for (let k = 0; k < n; k++) {
+        const alts = toks[k];
+        let p = tf.indexOf(alts[0]);
+        for (let i = 1; i < alts.length && p < 0; i++) p = tf.indexOf(alts[i]);
+        if (p === 0) s += 6; else if (p > 0 && tf.charCodeAt(p - 1) === 32) s += 4; else if (p > 0) s += 2;
+        else if (hasWord(af, alts)) s += 2;
       }
-      if (w.rep.tf === toks.join(' ')) s += 10;
-      w.score = s;
+      if (tf === whole) s += 10;
+      (buckets[s] || (buckets[s] = [])).push(w);
     }
-    out.sort((a, b) => b.score - a.score || a.id - b.id);
-  } else if (S.sort === 'author') out.sort((a, b) => (a.rep.af || '￿').localeCompare(b.rep.af || '￿') || a.id - b.id);
+    out.length = 0;
+    for (let s = buckets.length - 1; s >= 0; s--) if (buckets[s]) for (const w of buckets[s]) out.push(w);
+  } else if (S.sort === 'author') {
+    const rank = rankAuthors(), last = A.length, key = w => w.rep.a >= 0 ? rank[w.rep.a] : last;   // books without an author go last
+    out.sort((a, b) => key(a) - key(b) || a.id - b.id);
+  }
   else if (S.sort === 'year') out.sort((a, b) => (b.year || -1) - (a.year || -1) || a.id - b.id);
   else if (S.sort === 'size') out.sort((a, b) => b.size - a.size || a.id - b.id);
   else if (S.sort === 'added') out.sort((a, b) => b.mt - a.mt || a.id - b.id);
@@ -485,7 +588,7 @@ function filterWorks() {
 }
 
 /* ------------------------------------------------------------------------------------------ virtual list */
-const VL = { rows: [], offs: [0], total: 0, first: -1, last: -1, ver: 0 };
+const VL = { rows: [], offs: [0], total: 0, first: -1, last: -1, ver: 0, drawn: -1 };
 const host = $('vl'), inner = $('vl-in');
 function setRows(rows, heights) {
   VL.rows = rows; VL.offs = new Array(rows.length + 1); VL.offs[0] = 0;
@@ -500,12 +603,25 @@ function renderVL(force) {
   const y0 = Math.max(0, -top - over), y1 = Math.min(VL.total, -top + vh + over);
   const first = findRow(y0), last = Math.min(VL.rows.length, findRow(y1) + 1);
   if (!force && first === VL.first && last === VL.last) return;
-  VL.first = first; VL.last = last;
+  // the rows are rebuilt as the window moves: a row that has the keyboard focus gets it back
+  const act = document.activeElement;
+  const keep = VL.drawn === VL.ver && act && act.parentNode === inner ? VL.first + [...inner.children].indexOf(act) : -1;
+  VL.first = first; VL.last = last; VL.drawn = VL.ver;
   inner.style.paddingTop = VL.offs[first] + 'px';
   inner.style.height = VL.total + 'px';
   let h = '';
   for (let i = first; i < last; i++) h += rowHTML(VL.rows[i]);
   inner.innerHTML = h;
+  if (keep >= first && keep < last) inner.children[keep - first].focus({ preventScroll: true });
+}
+// Move the keyboard focus to the row at index i (skipping century headings in the direction of travel).
+function focusRow(i, step) {
+  while (i >= 0 && i < VL.rows.length && VL.rows[i].k === 'hd') i += step;
+  if (i < 0 || i >= VL.rows.length) return false;
+  if (i < VL.first || i >= VL.last) { window.scrollTo(0, host.getBoundingClientRect().top + scrollY + VL.offs[i] - 160); renderVL(true); }
+  const el = inner.children[i - VL.first];
+  if (el) el.focus();
+  return !!el;
 }
 let raf = 0;
 const onScroll = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; renderVL(); }); };
@@ -536,7 +652,7 @@ function rowHTML(r) {
   }
   if (r.k === 'cat') {
     const pad = 12 + r.depth * 20;
-    return `<article class="row cat" role="button" tabindex="0" data-cat="${esc(r.path)}" style="--h:${hueOf(r.path.split('/')[0])};padding-inline-start:${pad + 6}px"><span class="car ${r.open ? 'open' : ''}" data-tg="${esc(r.path)}">${r.kids ? '›' : ''}</span><span class="t"><bdi>${hl(r.name)}</bdi></span><span class="n">${num(r.n)}</span></article>`;
+    return `<article class="row cat" role="button" tabindex="0"${r.kids ? ` aria-expanded="${r.open}"` : ''} data-cat="${esc(r.path)}" style="--h:${hueOf(r.path.split('/')[0])};padding-inline-start:${pad + 6}px"><span class="car ${r.open ? 'open' : ''}" data-tg="${esc(r.path)}" aria-hidden="true">${r.kids ? '›' : ''}</span><span class="t"><bdi>${hl(r.name)}</bdi></span><span class="n">${num(r.n)}</span></article>`;
   }
   return '';
 }
@@ -561,11 +677,11 @@ function buildTree() {
 }
 function catRows() {
   TREE = TREE || buildTree();
-  const toks = fold(S.q).split(' ').filter(Boolean), rows = [];
-  const matches = n => toks.every(t => fold(n.path).indexOf(t) >= 0);
+  const toks = queryWords(S.q), rows = [], coll = new Intl.Collator(lang);
+  const matches = n => hasWords(n.f === undefined ? (n.f = fold(n.path)) : n.f, toks);
   const anyMatch = n => matches(n) || [...n.kids.values()].some(anyMatch);
   const walk = (node, depth) => {
-    const kids = [...node.kids.values()].sort((a, b) => a.name.localeCompare(b.name, lang));
+    const kids = [...node.kids.values()].sort((a, b) => coll.compare(a.name, b.name));
     for (const k of kids) {
       if (toks.length && !anyMatch(k)) continue;
       const open = toks.length ? true : expanded.has(k.path);
@@ -577,12 +693,12 @@ function catRows() {
   return rows;
 }
 function authorRows() {
-  const toks = fold(S.q).split(' ').filter(Boolean);
+  const toks = queryWords(S.q);
   buildIndex();
   const nb = new Map(); for (const b of B) if (b.a >= 0) nb.set(b.a, (nb.get(b.a) || 0) + 1);
   const groups = new Map();
   for (const a of A) {
-    if (!nb.has(a.i) || (toks.length && !toks.every(t => a.f.indexOf(t) >= 0))) continue;
+    if (!nb.has(a.i) || (toks.length && !hasWords(a.f, toks))) continue;
     a.nb = nb.get(a.i);
     const key = a.ck || 'none';
     if (!groups.has(key)) groups.set(key, { key, sort: a.sort, label: a.d ? centLabel(a.c, a.cal) : tr('unknown'), list: [] });
@@ -591,7 +707,7 @@ function authorRows() {
   const gs = [...groups.values()].sort((x, y) => x.sort - y.sort);
   const rows = []; RIB = [];
   for (const g of gs) {
-    g.list.sort((x, y) => x.f.localeCompare(y.f));
+    g.list.sort((x, y) => byText(x.f, y.f));
     RIB.push({ label: g.label, n: g.list.length, at: rows.length });
     rows.push({ k: 'hd', label: g.label, n: g.list.length });
     for (const a of g.list) rows.push({ k: 'au', a });
@@ -602,7 +718,7 @@ let RIB = [];
 
 function render(reset) {
   const v = S.view;
-  TOK = fold(S.q).split(' ').filter(Boolean);
+  TOK = queryWords(S.q).flat();
   $('stats').hidden = v !== 'stats'; host.hidden = v === 'stats';
   $('sortbox').hidden = v !== 'browse';
   document.querySelectorAll('[data-v]').forEach(b => b.setAttribute('aria-current', b.dataset.v === v ? 'page' : 'false'));
@@ -637,7 +753,7 @@ function emptyHTML() { return `<div class="empty"><h2>${esc(tr('no_results'))}</
 
 function renderActive() {
   const pills = [];
-  const add = (k, label) => pills.push(`<span class="pill"><span>${esc(label)}</span><button type="button" data-rm="${k}" aria-label="${esc(tr('close'))}">×</button></span>`);
+  const add = (k, label) => pills.push(`<span class="pill"><span>${esc(label)}</span><button type="button" data-rm="${k}" aria-label="${esc(tr('remove', { x: label }))}">×</button></span>`);
   if (S.view === 'browse') {
     if (S.cat) add('cat', S.cat.split('/').join(' › '));
     if (S.author >= 0) add('author', A[S.author].n);
@@ -654,28 +770,39 @@ function renderActive() {
 
 /* ---------------------------------------------------------------------------------------------- stats */
 function renderStats() {
-  const books = B.length, works = W.length, files = B.reduce((n, b) => n + (Array.isArray(b.fl) ? b.fl.length : b.fl ? 1 : 0), 0);
-  const size = B.reduce((n, b) => n + b.s, 0);
-  const cnt = (keyf) => { const m = new Map(); for (const b of B) { const k = keyf(b); if (k !== null && k !== undefined && k !== '') m.set(k, (m.get(k) || 0) + 1); } return [...m.entries()].sort((a, b) => b[1] - a[1]); };
+  const books = B.length, works = W.length;
+  const count = (m, k) => m.set(k, (m.get(k) || 0) + 1), ranked = m => [...m.entries()].filter(e => e[0] !== '').sort((x, y) => y[1] - x[1]);
+  const regroup = (m, keyf) => { const out = new Map(); m.forEach((n, i) => out.set(keyf(i), (out.get(keyf(i)) || 0) + n)); return out; };
+  const mCat = new Map(), mFmt = new Map(), mLang = new Map(), mDec = new Map(), nb = new Map(), big = [];
+  let files = 0, size = 0, withAuthor = 0, withYear = 0, withCat = 0, withFile = 0;
+  for (const b of B) {                                  // one pass over the books feeds every figure on the page
+    const nf = Array.isArray(b.fl) ? b.fl.length : b.fl ? 1 : 0;
+    files += nf; size += b.s;
+    if (nf) withFile++;
+    if (b.y) withYear++;
+    if (b.a >= 0) { withAuthor++; count(nb, b.a); }
+    if (b.c >= 0) { withCat++; count(mCat, b.c); }
+    if (b.f >= 0) count(mFmt, b.f);
+    if (b.l >= 0) count(mLang, b.l);
+    if (b.y > 1000) count(mDec, Math.floor(b.y / 10) * 10);
+    if (b.s && (big.length < 5 || b.s > big[4].s)) { big.push(b); big.sort((x, y) => y.s - x.s); if (big.length > 5) big.pop(); }
+  }
   const bars = (list, max, hue) => { const mx = Math.max(1, ...list.map(x => x[1])); return `<div class="bars">${list.slice(0, max).map(([k, n]) => `<div class="bar"><span class="l"><bdi>${esc(k)}</bdi></span><span class="tr"><i style="width:${Math.max(2, 100 * n / mx)}%;--h:${hue ?? hueOf(String(k))}"></i></span><span class="v">${num(n)}</span></div>`).join('')}</div>`; };
   const pct = (n, of) => of ? Math.round(100 * n / of) + '%' : '0%';
-  const withAuthor = B.filter(b => b.a >= 0).length, withYear = B.filter(b => b.y).length, withCat = B.filter(b => b.c >= 0).length, withFile = B.filter(b => b.fl && b.fl.length).length;
   const aDeath = A.filter(a => a.d).length, multi = W.filter(w => w.bs.length > 1).length;
-  const bycat = cnt(b => b.c >= 0 ? topCat(b.c) : '');
-  const byfmt = cnt(b => b.f >= 0 ? D.f[b.f].toUpperCase() : ''), bylang = cnt(b => b.l >= 0 ? D.l[b.l].toUpperCase() : '');
+  const bycat = ranked(regroup(mCat, topCat));
+  const byfmt = ranked(regroup(mFmt, i => D.f[i].toUpperCase())), bylang = ranked(regroup(mLang, i => D.l[i].toUpperCase()));
   const cents = new Map(); for (const a of A) if (a.d) { const k = a.ck; if (!cents.has(k)) cents.set(k, { n: 0, a }); cents.get(k).n++; }
   const cl = [...cents.values()].sort((x, y) => x.a.sort - y.a.sort);
   const mxC = Math.max(1, ...cl.map(c => c.n));
-  const dec = cnt(b => b.y > 1000 ? Math.floor(b.y / 10) * 10 : null).sort((a, b) => a[0] - b[0]);
-  const big = [...B].sort((a, b) => b.s - a.s).slice(0, 5).filter(b => b.s);
-  const nb = new Map(); for (const b of B) if (b.a >= 0) nb.set(b.a, (nb.get(b.a) || 0) + 1);
-  const topA = [...nb.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([i, n]) => [A[i].n, n]);
+  const dec = [...mDec.entries()].sort((x, y) => x[0] - y[0]), mxD = Math.max(1, ...dec.map(x => x[1]));
+  const topA = [...nb.entries()].sort((x, y) => y[1] - x[1]).slice(0, 8).map(([i, n]) => [A[i].n, n]);
   const kp = (n, l) => `<div class="kpi"><b>${n}</b><span>${esc(l)}</span></div>`;
   const q = (n, l) => `<div class="bar"><span class="l">${esc(l)}</span><span class="tr"><i style="width:${books ? 100 * n / books : 0}%;--h:150"></i></span><span class="v">${pct(n, books)}</span></div>`;
   $('stats').innerHTML = `<div class="kpis">${kp(num(works), tr('browse'))}${files ? kp(num(files), tr('files')) : ''}${size ? kp(bytes(size), tr('total_size')) : ''}${kp(num(A.length), tr('authors'))}${kp(num(D.c.length), tr('categories'))}</div>
   ${bycat.length ? `<section class="card"><h2>${esc(tr('by_cat'))}</h2>${bars(bycat, 12)}</section>` : ''}
   ${cl.length ? `<section class="card"><h2>${esc(tr('by_cent'))}</h2><div class="cols">${cl.map(c => `<div title="${esc(centLabel(c.a.c, c.a.cal))}: ${c.n}"><em>${c.n}</em><i style="height:${Math.max(3, 82 * c.n / mxC)}px"></i><em>${c.a.c < 0 ? -c.a.c + 'b' : c.a.c}${c.a.cal === 'ah' ? 'ه' : ''}</em></div>`).join('')}</div></section>` : ''}
-  ${dec.length > 1 ? `<section class="card"><h2>${esc(tr('by_year'))}</h2><div class="cols">${dec.map(([d, n]) => `<div title="${d}s: ${n}"><em>${n}</em><i style="height:${Math.max(3, 82 * n / Math.max(...dec.map(x => x[1])))}px"></i><em>${String(d).slice(2)}</em></div>`).join('')}</div></section>` : ''}
+  ${dec.length > 1 ? `<section class="card"><h2>${esc(tr('by_year'))}</h2><div class="cols">${dec.map(([d, n]) => `<div title="${d}s: ${n}"><em>${n}</em><i style="height:${Math.max(3, 82 * n / mxD)}px"></i><em>${String(d).slice(2)}</em></div>`).join('')}</div></section>` : ''}
   <div class="kpis"><section class="card" style="grid-column:1/-1"><h2>${esc(tr('quality'))}</h2><div class="bars">${q(withAuthor, tr('with_author'))}${q(withYear, tr('with_year'))}${q(withCat, tr('with_cat'))}${q(withFile, tr('with_file'))}</div><p class="small">${num(aDeath)} / ${num(A.length)} ${esc(tr('with_death'))} · ${num(multi)} ${esc(tr('multi'))}</p></section></div>
   ${byfmt.length || bylang.length ? `<section class="card"><h2>${esc(tr('by_fmt'))} · ${esc(tr('by_lang'))}</h2>${bars(byfmt, 6, 210)}${bylang.length ? '<br>' + bars(bylang, 6, 30) : ''}</section>` : ''}
   ${topA.length ? `<section class="card"><h2>${esc(tr('top_authors'))}</h2>${bars(topA, 8, 270)}</section>` : ''}
@@ -683,13 +810,32 @@ function renderStats() {
 }
 
 /* --------------------------------------------------------------------------------------------- sheet */
-let lastFocus = null;
+// One panel serves the book details, the filters and the settings. While it is open the page behind it is inert
+// (no focus, not read by a screen reader), and it has its own history entry so that the Back button closes it.
+let lastFocus = null, lastRow = '';
+const sheetOpen = () => !$('sheet').hidden;
+// A list row is rebuilt whenever the list is drawn again, so it is remembered by what it shows, not as an element.
+const rowKey = el => el && el.parentNode === inner ? ['w', 'au', 'cat'].map(k => el.dataset[k] === undefined ? '' : k + '=' + el.dataset[k]).join('') : '';
 function showSheet(html) {
-  lastFocus = document.activeElement;
-  $('panel-in').innerHTML = html; $('sheet').hidden = false; $('panel').scrollTop = 0; $('panel').focus();
+  if (!sheetOpen()) { lastFocus = document.activeElement; lastRow = rowKey(lastFocus); }
+  $('panel-in').innerHTML = html; $('sheet').hidden = false; $('app').inert = true;
+  const h = $('panel-in').querySelector('h2'); if (h) h.id = 'panel-t';
+  $('panel').scrollTop = 0; $('panel').focus();
   document.body.style.overflow = 'hidden';
 }
-function hideSheet() { $('sheet').hidden = true; document.body.style.overflow = ''; if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true }); }
+function hideSheet() {
+  if (!sheetOpen()) return;
+  $('sheet').hidden = true; $('app').inert = false; document.body.style.overflow = '';
+  const back = lastFocus && lastFocus.isConnected ? lastFocus : lastRow && [...inner.children].find(el => rowKey(el) === lastRow);
+  if (back) back.focus({ preventScroll: true });
+}
+function pushPanelEntry() { if (!inPanelEntry()) try { history.pushState({ panel: 1 }, '', location.href); } catch (_) {} }
+// Every way of closing a panel (its close button, the dimmed page, Escape) ends here.
+function closeSheet() {
+  if (!sheetOpen()) return;
+  if (inPanelEntry()) return history.back();          // the popstate handler hides it
+  S.open = ''; hideSheet(); writeHash(false, null);
+}
 function kv(pairs) { const rows = pairs.filter(p => p[1]); return rows.length ? `<dl class="kv">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd><bdi>${esc(v)}</bdi></dd>`).join('')}</dl>` : ''; }
 function filesHTML(b) {
   const fl = b.fl;
@@ -697,6 +843,8 @@ function filesHTML(b) {
   if (!Array.isArray(fl)) return `<a class="open" href="${esc(href(fl))}">${esc(tr('open'))} ${D.f[b.f] ? esc(D.f[b.f].toUpperCase()) : ''}${b.s ? ' · ' + bytes(b.s) : ''}</a>`;
   return `<ul class="vols">${fl.map(([lab, p, sz]) => p ? `<li><a href="${esc(href(p))}"><span>${esc(lab)}</span><small>${bytes(sz)}</small></a></li>` : `<li><span>${esc(lab)}<small>${bytes(sz)}</small></span></li>`).join('')}</ul>`;
 }
+// A page opened from an Android file manager has a content:// address, and a relative link cannot be followed from it.
+const linkHint = (protocol, w) => protocol === 'content:' && w.bs.some(b => [].concat(b.fl || []).some(f => { const p = Array.isArray(f) ? f[1] : f; return p && !ABS_URL.test(href(p)); }));
 function openWork(id, push = true) {
   const w = W[id]; if (!w) return;
   const b0 = w.rep, a = b0.a >= 0 ? A[b0.a] : null;
@@ -705,24 +853,25 @@ function openWork(id, push = true) {
   const multi = w.bs.length > 1, cats = new Set(w.bs.map(b => b.c));
   const catBtn = c => `<button type="button" style="all:unset;cursor:pointer;color:var(--accent);text-decoration:underline" data-pc="${esc(D.c[c])}" title="${esc(tr('pick_cat'))}">${esc(D.c[c].split('/').join(' › '))}</button>`;
   if (cats.size === 1 && b0.c >= 0) h += `<p class="small" style="margin:-4px 0 12px">${catBtn(b0.c)}</p>`;
+  if (linkHint(location.protocol, w)) h += `<p class="small hint">${esc(tr('content_hint'))}</p>`;
   w.bs.forEach((b, k) => {
     const d = b.d, label = [d.ed, d.e, d.p, b.y || ''].filter(Boolean).join(' · ');
     const single = !Array.isArray(b.fl);
     h += `<div class="${multi ? 'ed-card' : ''}">${multi ? `<h3>${esc(tr('edition'))} ${k + 1}${label ? ' · ' + esc(label) : ''}</h3>` : ''}${filesHTML(b)}${kv([
       [tr('editor'), d.e], [tr('publisher'), [d.p, d.pl].filter(Boolean).join(' – ')], [tr('edition'), multi ? '' : d.ed], [tr('pubyear'), multi && label.includes(String(b.y)) ? '' : b.y || ''], [tr('series'), d.s], [tr('isbn'), d.i],
       [tr('pages'), d.pg ? num(d.pg) : ''], [tr('format'), single ? '' : b.f >= 0 ? D.f[b.f].toUpperCase() : ''], [tr('language'), b.l >= 0 && !(multi && k) ? D.l[b.l].toUpperCase() : ''], [tr('size'), single ? '' : bytes(b.s)],
-      [tr('tags'), (d.t || []).join(' · ')], [tr('notes'), d.n], [tr('ids'), d.x ? Object.entries(d.x).map(([k2, v]) => k2 + ': ' + v).join(' · ') : ''],
+      [tr('aka'), (d.at || []).join(' · ')], [tr('tags'), (d.t || []).join(' · ')], [tr('notes'), d.n], [tr('ids'), d.x ? Object.entries(d.x).map(([k2, v]) => k2 + ': ' + v).join(' · ') : ''],
     ])}${cats.size > 1 && b.c >= 0 ? `<dl class="kv"><dt>${esc(tr('category'))}</dt><dd>${catBtn(b.c)}</dd></dl>` : ''}</div>`;
   });
   showSheet(h);
-  S.open = String(id); writeHash(push);
+  S.open = String(id); writeHash(push, push ? { panel: 1 } : undefined);
 }
-function closeWork() { if (S.open) { S.open = ''; hideSheet(); writeHash(false); } }
 
 function openFilters() {
   const opts = (items, cur) => `<option value="">${esc(tr('all'))}</option>` + items.map(([v, l]) => `<option value="${esc(v)}"${v === cur ? ' selected' : ''}>${esc(l)}</option>`).join('');
-  const cats = [...new Set(D.c.flatMap(c => { const p = c.split('/'); return p.map((_, i) => p.slice(0, i + 1).join('/')); }))].sort((a, b) => a.localeCompare(b, lang)).map(c => [c, ' '.repeat(c.split('/').length - 1) + c.split('/').pop()]);
+  const cats = [...new Set(D.c.flatMap(c => { const p = c.split('/'); return p.map((_, i) => p.slice(0, i + 1).join('/')); }))].sort(new Intl.Collator(lang).compare).map(c => [c, ' '.repeat(c.split('/').length - 1) + c.split('/').pop()]);
   const cents = [...new Map(A.filter(a => a.d).sort((x, y) => x.sort - y.sort).map(a => [a.ck, centLabel(a.c, a.cal)])).entries()];
+  pushPanelEntry();
   showSheet(`<h2>${esc(tr('filters'))}</h2>
    <label class="field"><span>${esc(tr('category'))}</span><select id="f-cat">${opts(cats, S.cat)}</select></label>
    ${D.l.length ? `<label class="field"><span>${esc(tr('language'))}</span><select id="f-lang">${opts(D.l.map(l => [l, l.toUpperCase()]), S.lang)}</select></label>` : ''}
@@ -731,11 +880,13 @@ function openFilters() {
    <label class="check"><input type="checkbox" id="f-multi"${S.multi ? ' checked' : ''}><span>${esc(tr('only_multi'))}</span></label>
    <div class="row2"><button class="ghost" type="button" id="f-reset">${esc(tr('reset'))}</button><button class="go" type="button" id="f-done">${esc(tr('done'))}</button></div>`);
   const apply = () => { S.cat = $('f-cat').value; S.lang = $('f-lang') ? $('f-lang').value : ''; S.fmt = $('f-fmt') ? $('f-fmt').value : ''; S.cent = $('f-cent') ? $('f-cent').value : ''; S.multi = $('f-multi').checked; };
-  $('f-done').onclick = () => { apply(); hideSheet(); writeHash(true); render(true); };
-  $('f-reset').onclick = () => { S.cat = S.lang = S.fmt = S.cent = ''; S.multi = false; S.author = -1; hideSheet(); writeHash(true); render(true); };
+  // the panel's history entry becomes the filtered list: Back then returns to the list as it was before
+  $('f-done').onclick = () => { apply(); hideSheet(); writeHash(inPanelEntry() ? false : true, null); render(true); };
+  $('f-reset').onclick = () => { S.cat = S.lang = S.fmt = S.cent = ''; S.multi = false; S.author = -1; hideSheet(); writeHash(inPanelEntry() ? false : true, null); render(true); };
 }
 function openSettings() {
   const seg = (key, items, cur) => `<div class="seg" data-seg="${key}">${items.map(([v, l]) => `<button type="button" data-val="${v}" aria-pressed="${v === cur}">${esc(l)}</button>`).join('')}</div>`;
+  pushPanelEntry();
   showSheet(`<h2>${esc(tr('settings'))}</h2>
    <div class="field"><span>${esc(tr('ui_language'))}</span>${seg('lang', Object.keys(T).map(k => [k, T[k].name]), lang)}</div>
    <div class="field"><span>${esc(tr('theme'))}</span>${seg('theme', [['auto', tr('auto')], ['light', tr('light')], ['dark', tr('dark')]], store.get('theme', 'auto'))}</div>
@@ -744,31 +895,42 @@ function openSettings() {
 }
 
 /* -------------------------------------------------------------------------------------------- chrome */
+const themeColor = () => { $('theme-color').content = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim(); };
+const searchDir = () => { $('q').dir = $('q').value ? 'auto' : T[lang].dir; };   // an Arabic query reads right to left in any interface
 function applyChrome() {
   const L = T[lang], root = document.documentElement;
   root.lang = lang; root.dir = L.dir;
   const th = store.get('theme', 'auto'); if (th === 'auto') root.removeAttribute('data-theme'); else root.dataset.theme = th;
   root.dataset.palette = store.get('palette', 'lapis');
+  themeColor();
   $('ttl').textContent = D.m.t; document.title = D.m.t;
-  $('q').placeholder = L.search; $('q').value = S.q;
+  $('q').placeholder = L.search; $('q').setAttribute('aria-label', L.search); $('q').value = S.q; searchDir();
   $('btn-set').innerHTML = ICON.gear; $('btn-set').setAttribute('aria-label', L.settings);
   $('x').innerHTML = ICON.x; $('x').setAttribute('aria-label', L.close);
   const labels = { browse: tr('browse'), cats: tr('categories'), authors: tr('authors'), stats: tr('stats') };
   const tabs = VIEWS.map(([v, ic]) => `<button type="button" data-v="${v}">${ICON[ic]}<span>${esc(labels[v])}</span></button>`).join('');
   $('nav').innerHTML = tabs; $('tabs').innerHTML = tabs;
+  $('nav').setAttribute('aria-label', L.views); $('tabs').setAttribute('aria-label', L.views);
   $('sort-l').textContent = L.sort;
-  $('sort').innerHTML = ['rel', 'title', 'author', 'year', 'size', 'added'].map(k => `<option value="${k}"${S.sort === k ? ' selected' : ''}>${esc(tr(k === 'rel' ? 'relevance' : k === 'title' ? 'title' : k))}</option>`).join('');
+  $('sort').innerHTML = SORTS.map(k => `<option value="${k}"${S.sort === k ? ' selected' : ''}>${esc(tr(k === 'rel' ? 'relevance' : k))}</option>`).join('');
 }
 
 /* ------------------------------------------------------------------------------------------- events */
-const reRender = () => { applyChrome(); render(false); };
-function go(view) { S.view = view; S.open = ''; $('sheet').hidden = true; document.body.style.overflow = ''; writeHash(true); render(true); }
+function go(view) { S.view = view; S.open = ''; hideSheet(); writeHash(true); render(true); }
+// Open or close a branch of the category tree; the row keeps the keyboard focus when it had it.
+function toggleCat(path, open, refocus) {
+  if (open === expanded.has(path)) return;
+  expanded.has(path) ? expanded.delete(path) : expanded.add(path);
+  const y = scrollY; render(false); scrollTo(0, y);
+  const el = refocus && [...inner.children].find(r => r.dataset.cat === path);
+  if (el) el.focus({ preventScroll: true });
+}
 document.addEventListener('click', e => {
   const t = e.target;
   const v = t.closest('[data-v]'); if (v) return go(v.dataset.v);
   const rm = t.closest('[data-rm]');
   if (rm) { const k = rm.dataset.rm; if (k === 'author') S.author = -1; else if (k === 'multi') S.multi = false; else S[k] = ''; writeHash(true); return render(true); }
-  if (t.closest('#clr')) { S.q = ''; S.cat = S.lang = S.fmt = S.cent = ''; S.author = -1; S.multi = false; $('q').value = ''; writeHash(true); return render(true); }
+  if (t.closest('#clr')) { S.q = ''; S.cat = S.lang = S.fmt = S.cent = ''; S.author = -1; S.multi = false; $('q').value = ''; searchDir(); writeHash(true); return render(true); }
   const rib = t.closest('[data-rib]'); if (rib) { const at = RIB[+rib.dataset.rib].at; window.scrollTo(0, host.getBoundingClientRect().top + scrollY + VL.offs[at] - 150); return; }
   const pa = t.closest('[data-pa]'); if (pa) { S.open = ''; hideSheet(); S.view = 'browse'; S.author = +pa.dataset.pa; S.q = ''; writeHash(true); return render(true); }
   const pc = t.closest('[data-pc]'); if (pc) { S.open = ''; hideSheet(); S.view = 'browse'; S.cat = pc.dataset.pc; S.q = ''; writeHash(true); return render(true); }
@@ -776,34 +938,58 @@ document.addEventListener('click', e => {
   if (seg) {
     const key = seg.parentNode.dataset.seg, val = seg.dataset.val;
     if (key === 'lang') { lang = val; store.set('lang', val); } else store.set(key, val);
-    applyChrome(); render(false); openSettings(); return;
+    applyChrome(); render(false); openSettings();
+    const again = document.querySelector(`[data-seg="${key}"] [data-val="${val}"]`); if (again) again.focus();
+    return;
   }
-  if (t.closest('#scrim') || t.closest('#x')) { if (S.open) { history.length > 1 && location.hash.includes('b=') ? history.back() : closeWork(); } else hideSheet(); return; }
+  if (t.closest('#scrim') || t.closest('#x')) return closeSheet();
   if (t.closest('#btn-set')) return openSettings();
   if (t.closest('#btn-filter')) return openFilters();
   const tg = t.closest('[data-tg]');
-  if (tg && S.view === 'cats') { const p = tg.dataset.tg; expanded.has(p) ? expanded.delete(p) : expanded.add(p); const y = scrollY; render(false); scrollTo(0, y); return; }
+  if (tg && tg.textContent && S.view === 'cats') return toggleCat(tg.dataset.tg);
   const wr = t.closest('[data-w]'); if (wr) return openWork(+wr.dataset.w);
   const au = t.closest('[data-au]'); if (au) { S.view = 'browse'; S.author = +au.dataset.au; S.q = ''; writeHash(true); return render(true); }
   const ct = t.closest('[data-cat]'); if (ct) { S.view = 'browse'; S.cat = ct.dataset.cat; S.q = ''; writeHash(true); return render(true); }
 });
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && !$('sheet').hidden) { S.open ? (history.back()) : hideSheet(); return; }
-  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('.row[role=button]')) { e.preventDefault(); e.target.click(); }
-  if (e.key === '/' && document.activeElement !== $('q') && $('sheet').hidden) { e.preventDefault(); $('q').focus(); }
+  const k = e.key, el = e.target, row = el.parentNode === inner ? el : null;
+  if (k === 'Escape' && sheetOpen()) return closeSheet();
+  if (e.altKey || e.ctrlKey || e.metaKey) return;
+  if ((k === 'Enter' || k === ' ') && row && row.matches('[role=button]')) { e.preventDefault(); return row.click(); }
+  if (row && (k === 'ArrowDown' || k === 'ArrowUp')) {       // the arrows walk the list; above the first row is the search box
+    const step = k === 'ArrowDown' ? 1 : -1;
+    e.preventDefault();
+    if (!focusRow(VL.first + [...inner.children].indexOf(row) + step, step) && step < 0) $('q').focus();
+    return;
+  }
+  if (row && row.hasAttribute('aria-expanded') && (k === 'ArrowRight' || k === 'ArrowLeft')) {   // towards the text end opens a branch
+    e.preventDefault();
+    return toggleCat(row.dataset.cat, (k === 'ArrowRight') === (document.documentElement.dir !== 'rtl'), true);
+  }
+  if (el === $('q') && (k === 'ArrowDown' || k === 'Enter') && !e.isComposing) {
+    // Enter on a phone only puts the keyboard away; with a real keyboard, Enter and the down arrow go to the results
+    if (k === 'Enter' && matchMedia('(pointer:coarse)').matches) return $('q').blur();
+    if (S.view !== 'stats' && VL.rows.length) { e.preventDefault(); clearTimeout(qt); if (S.q !== $('q').value) { S.q = $('q').value; writeHash(false); render(true); } focusRow(0, 1); }
+    return;
+  }
+  if (k === '/' && el !== $('q') && !sheetOpen()) { e.preventDefault(); $('q').focus(); }
 });
 let qt = 0;
-$('q').addEventListener('input', () => { clearTimeout(qt); qt = setTimeout(() => { S.q = $('q').value; writeHash(false); render(true); }, 60); });
+$('q').addEventListener('input', () => { searchDir(); clearTimeout(qt); qt = setTimeout(() => { S.q = $('q').value; writeHash(false); render(true); }, 60); });
 $('sort').addEventListener('change', () => { S.sort = $('sort').value; writeHash(false); render(true); });
-addEventListener('popstate', () => { const wasOpen = S.open; readHash(); $('q').value = S.q; if (!S.open) { $('sheet').hidden = true; document.body.style.overflow = ''; } render(false); if (S.open) openWork(+S.open, false); });
-matchMedia('(prefers-color-scheme:dark)').addEventListener?.('change', () => {});
+addEventListener('popstate', () => { readHash(); $('q').value = S.q; searchDir(); render(false); if (S.open) openWork(+S.open, false); else hideSheet(); });
+matchMedia('(prefers-color-scheme:dark)').addEventListener?.('change', themeColor);
 
 applyChrome();
 $('boot').hidden = true; $('app').hidden = false;
 render(false);
-if (S.open && W[+S.open]) openWork(+S.open, false);
-setTimeout(buildIndex, 30);
-window.__pocketshelf = { readyMs: performance.now(), loadMs: tLoad, modelMs: tModel, books: B.length, works: W.length, search: q => { S.q = q; render(true); return RES.length; }, state: S };
+if (S.open) openWork(+S.open, false);
+setTimeout(indexInBackground, 30);
+window.__pocketshelf = {
+  readyMs: performance.now(), loadMs: tLoad, modelMs: tModel, books: B.length, works: W.length, state: S,
+  search: q => { S.q = q; render(true); return RES.length; },           // hooks for the tests and the benchmarks
+  indexed: () => ixWorks >= W.length, linkHint: (protocol, id) => linkHint(protocol, W[id]),
+};
 })();
 </script>
 </body>

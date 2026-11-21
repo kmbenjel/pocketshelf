@@ -23,7 +23,8 @@ export async function launch({ unit = 'pocketshelf-chrome' } = {}) {
   child.on('error', e => { failed = e; });
   child.unref();
   const stop = () => {
-    try { direct ? process.kill(-child.pid, 'SIGTERM') : execFileSync('systemctl', ['--user', 'stop', name], { stdio: 'ignore' }); } catch {}
+    // the profile is thrown away, so a direct Chrome is killed outright: nothing is left writing into the folder
+    try { direct ? process.kill(-child.pid, 'SIGKILL') : execFileSync('systemctl', ['--user', 'stop', name], { stdio: 'ignore' }); } catch {}
     try { rmSync(prof, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 }); } catch {}
   };
   // Chrome writes the port it chose into its profile folder
